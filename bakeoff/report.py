@@ -91,6 +91,7 @@ def render(
     dataset_meta: dict | None = None,
     conclusions_html: str | None = None,
     label_dependence: dict[str, tuple[float, float]] | None = None,
+    relabel: dict | None = None,
 ) -> str:
     hidden_cost = {w["variant"] for w in withheld if w["figure"] == "cost"} if public else set()
     by_name = {s.name: s for s in scores}
@@ -251,6 +252,51 @@ def render(
         parts.append(
             '<div class="scroll">' + _table(["Variant", "As generated", "As frozen", "Change"], rows) + "</div>"
         )
+
+    # Spec 004 B3-B5: the independent relabeling, or a plain statement that none exists.
+    parts.append("<h2>Independent relabeling</h2>")
+    if not relabel:
+        parts.append("<p>No independent check of the edited labels has been made yet.</p>")
+    else:
+        rec = relabel["record"]
+        parts.append(
+            f"<p>A blind second opinion from <code>{_e(rec['rater_model'])}</code> ({_e(rec['rater_vendor'])}), a vendor with "
+            f"no variant in this run, on {rec['blind_set']['messages']} messages: every message with an edited label plus "
+            f"{rec['blind_set']['controls']} without, shuffled, with no label shown. It is one model's single pass, not "
+            "ground truth, and it was given the same definitions the labels were edited to fit, so it tests whether the "
+            "edits apply those definitions, not whether the definitions are neutral.</p>"
+        )
+        if rec.get("failed"):
+            parts.append(f'<p class="warn">{len(rec["failed"])} messages got no answer and are left out of everything below.</p>')
+        rows = []
+        for q in QUESTIONS:
+            a = relabel["agreement"][q.name]
+            if not a["edited"]:
+                continue
+            base = f"{a['control_agree']} of {a['control']} ({_pct(a['control_agree'] / a['control'])})" if a["control"] else "n/a"
+            rows.append([_e(q.name), str(a["edited"]), f"{a['frozen']} ({_pct(a['frozen'] / a['edited'])})",
+                         f"{a['generated']} ({_pct(a['generated'] / a['edited'])})", f"{a['neither']} ({_pct(a['neither'] / a['edited'])})", base])
+        parts.append("<p class='muted'>Edited labels, per question: which version the outside model agreed with, beside its "
+                     "agreement with the frozen labels on that question across the controls.</p>")
+        parts.append('<div class="scroll">' + _table(
+            ["Question", "Edited labels", "Agrees with frozen", "Agrees with generated", "Neither", "Control agreement"], rows) + "</div>")
+        alt = {s.name: s for s in relabel["ranked"]}
+        rows, same = [], True
+        for s in complete:
+            t = alt.get(s.name)
+            if t is None:
+                continue
+            same &= (t.rank == s.rank and t.tier == s.tier)
+            rows.append([_e(s.name), f"{s.rank} (tier {s.tier})", _pct(s.all_four / s.classified),
+                         f"{t.rank} (tier {t.tier})", _pct(t.all_four / t.classified)])
+        top_now = {s.name for s in complete if s.rank == 1}
+        top_alt = {s.name for s in relabel["ranked"] if s.rank == 1}
+        verdict = ("Rank 1 and every variant's rank and tier are the same under the outside model's labels."
+                   if same else ("Rank 1 is the same under the outside model's labels, but some ranks or tiers change."
+                                 if top_now == top_alt else "Rank 1 changes under the outside model's labels."))
+        parts.append(f"<p><b>{_e(verdict)}</b> Only the {relabel['edited_count']} edited labels were replaced; every other label is as frozen.</p>")
+        parts.append('<div class="scroll">' + _table(
+            ["Variant", "Rank, frozen labels", "All four, frozen", "Rank, outside labels on the edits", "All four, outside"], rows) + "</div>")
 
     # Per-question accuracy, every variant that classified anything.
     rows = []

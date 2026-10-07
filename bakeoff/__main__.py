@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 
-from . import conclusions
+from . import conclusions, relabel
 from . import dataset as ds
 from .report import load_withheld, render
 from .runner import RESULTS_DIR, run
@@ -43,7 +43,23 @@ def write_reports(run_dir: Path) -> tuple[Path, Path]:
     if original is not None:
         before, after = all_four_shares(meta, records, original), all_four_shares(meta, records, dataset)
         label_dependence = {n: (before[n], after[n]) for n in after if n in before}
-    args = dict(meta=meta, scores=scores, withheld=withheld, dataset_meta=dataset_meta, label_dependence=label_dependence)
+    # Spec 004: the independent relabeling, when one is on record.
+    relabel_view = None
+    record = relabel.load()
+    if record is not None:
+        relabel.check_independent(record, meta.get("models", {}))
+        edits = relabel.edited_labels()
+        alt = score_run(meta, records, relabel.with_rater_on_edits(dataset, record, edits))
+        relabel_view = {
+            "record": record,
+            "agreement": relabel.agreement(record, dataset, edits),
+            "ranked": [s for s in alt if s.complete],
+            "edited_count": len(edits),
+        }
+    args = dict(
+        meta=meta, scores=scores, withheld=withheld, dataset_meta=dataset_meta,
+        label_dependence=label_dependence, relabel=relabel_view,
+    )
     # Spec 002: conclusions belong to one run, and every figure they quote must be in
     # that run's public edition as it reads without them. Check before writing anything.
     text = conclusions.load(meta["run_id"])
@@ -78,6 +94,7 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--variant", action="append", choices=list(BY_NAME), help="repeat to pick several; default all")
     r.add_argument("--cap", type=float, default=DEFAULT_CAP_USD, help="spend cap per variant in USD")
     r.add_argument("--limit", type=int, help="first N messages only, for a smoke test (reported as partial)")
+    sub.add_parser("relabel", help="blind outside-model relabeling of the edited messages (spec 004); costs money")
     rep = sub.add_parser("report", help="rebuild both reports from a saved run, no provider calls")
     rep.add_argument("run_dir", nargs="?", type=Path, help="default: the latest run")
     args = parser.parse_args(argv)
@@ -106,6 +123,16 @@ def main(argv: list[str] | None = None) -> None:
             print("smoke test: reports skipped, since they score against the full dataset")
             return
         args.command, args.run_dir = "report", run_dir
+    if args.command == "relabel":
+        load_env()
+        dataset, _ = ds.load_frozen()
+        items = relabel.blind_set(dataset, relabel.edited_labels())
+        record = relabel.run(items)
+        relabel.RELABEL_DIR.mkdir(parents=True, exist_ok=True)
+        relabel.RELABEL_FILE.write_text(json.dumps(record, indent=2) + "\n")
+        print(f"labeled {len(record['labels'])} of {len(items)}, failed {len(record['failed'])}, cost ${record['cost_usd']:.4f}")
+        print(f"served by {record['served_by']}, model {record['models_reported']}; wrote {relabel.RELABEL_FILE.relative_to(ROOT)}")
+        return
     if args.command == "report":
         run_dir = args.run_dir or max(RESULTS_DIR.iterdir(), key=lambda p: p.name)
         full, public = write_reports(run_dir)
