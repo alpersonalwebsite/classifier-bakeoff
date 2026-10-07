@@ -133,6 +133,8 @@ def test_b6_the_record_carries_what_a_rerun_needs(tmp_path):
     for key in ("rater_model", "endpoint_requested", "settings", "request_shape", "blind_set", "date"):
         assert record[key], key
     assert record["blind_set"]["seed"] == relabel.SEED
+    assert record["service_tier_reported"] == {"not reported": 1}  # counted per answered call, as reported
+    assert "google-vertex/global" in record["endpoint_note"]
 
 
 def test_a_truncated_answer_is_retried_and_a_fenced_answer_is_read(tmp_path):
@@ -146,3 +148,48 @@ def test_a_truncated_answer_is_retried_and_a_fenced_answer_is_read(tmp_path):
     record = relabel.run([{"blind_id": "b01", "message_id": "m001", "text": "a"}],
                          client=_OpenRouter(inner=mock(lambda r: json_response(next(replies)))), results_dir=tmp_path, sleep=lambda s: None)
     assert record["labels"]["m001"] == good and record["failed"] == []
+
+
+def test_spec005_b1_the_drafting_request_holds_no_current_definition_label_log_or_message(frozen):
+    from bakeoff import definitions
+    from bakeoff.questions import QUESTIONS
+
+    sent = json.dumps(definitions.drafting_request())
+    for q in QUESTIONS:
+        assert q.name in sent and all(json.dumps(l)[1:-1] in sent for l in q.labels)
+        assert q.text not in sent  # no current definition text
+    assert "label-changes" not in sent and "m001" not in sent
+    assert not any(m["text"][:60] in sent for m in frozen)  # no dataset message
+
+
+def test_spec005_an_unapproved_definition_set_cannot_be_loaded(tmp_path, monkeypatch):
+    from bakeoff import questions
+
+    monkeypatch.setattr(questions, "DEFINITIONS_DIR", tmp_path)
+    (tmp_path / "x.json").write_text(json.dumps({"approved": False, "original": {q.name: "t" for q in questions.QUESTIONS}}))
+    with pytest.raises(ValueError):
+        questions.load_set("x")
+    (tmp_path / "x.json").write_text(json.dumps({"approved": True, "original": {q.name: "t" for q in questions.QUESTIONS}, "final": None}))
+    loaded = questions.load_set("x")
+    assert [q.labels for q in loaded] == [q.labels for q in questions.QUESTIONS] and all(q.text == "t" for q in loaded)
+    assert questions.questions_version(loaded) != questions.questions_version()
+
+
+def test_spec005_b2_outside_labels_allow_two_intents_and_one_label_elsewhere():
+    from bakeoff.questions import QUESTIONS
+    good = {"intent": ["buy", "sell"], "timeline": "unknown", "wants_contact": "yes", "urgency": "normal"}
+    body = {"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(good)}}]}
+    assert relabel._parse_outside(body, QUESTIONS) == {"intent": ["buy", "sell"], "timeline": ["unknown"], "wants_contact": ["yes"], "urgency": ["normal"]}
+    bad = dict(good, urgency="maybe")
+    assert relabel._parse_outside({"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(bad)}}]}, QUESTIONS) is None
+    req = relabel.outside_request("x", QUESTIONS)
+    assert req["response_format"]["json_schema"]["schema"]["properties"]["intent"]["maxItems"] == 2
+    assert req["messages"][1] == {"role": "user", "content": "x"}
+
+
+def test_spec005_b2_the_frozen_dataset_is_unchanged_by_outside_labels(frozen):
+    before = json.dumps(frozen, sort_keys=True)
+    record = {"labels": {frozen[0]["id"]: {"intent": ["sell"], "timeline": ["unknown"], "wants_contact": ["yes"], "urgency": ["normal"]}}}
+    out = relabel.outside_dataset(frozen, record)
+    assert json.dumps(frozen, sort_keys=True) == before and len(out) == 1 and out[0]["truth"]["intent"] == ["sell"]
+    assert ds.load_frozen()[1] == "sha256:8c43a059d800a559"

@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 
-from . import conclusions, relabel
+from . import conclusions, definitions, relabel
 from . import dataset as ds
 from .report import load_withheld, render
 from .runner import RESULTS_DIR, run
@@ -56,9 +56,33 @@ def write_reports(run_dir: Path) -> tuple[Path, Path]:
             "ranked": [s for s in alt if s.complete],
             "edited_count": len(edits),
         }
+    # Spec 005: the same run against the outside labels, and the run under the outside definitions.
+    outside_view = None
+    if definitions.SET_FILE.exists() and relabel.OUTSIDE_FILE.exists():
+        drec = json.loads(definitions.SET_FILE.read_text())
+        lrec = json.loads(relabel.OUTSIDE_FILE.read_text())
+        out_data = relabel.outside_dataset(dataset, lrec)
+        full = None
+        if drec.get("run_id") and (RESULTS_DIR / drec["run_id"]).exists():
+            ometa, orecs = load_run(RESULTS_DIR / drec["run_id"])
+            full = [s for s in score_run(ometa, orecs, out_data) if s.complete]
+        labeled = list(lrec["labels"].values())
+        outside_view = {
+            "definitions": drec,
+            "mid": [s for s in score_run(meta, records, out_data) if s.complete],
+            "full": full,
+            "notes": {
+                "two_intent": sum(len(v["intent"]) == 2 for v in labeled),
+                "frozen_two_intent": sum(len(m["truth"]["intent"]) == 2 for m in dataset),
+                "contact_no": sum(v["wants_contact"] == ["no"] for v in labeled),
+                "frozen_contact_no": sum(m["truth"]["wants_contact"] == ["no"] for m in dataset if m["id"] in lrec["labels"]),
+                "labeled": len(labeled),
+                "left_out": len(dataset) - len(labeled),
+            },
+        }
     args = dict(
         meta=meta, scores=scores, withheld=withheld, dataset_meta=dataset_meta,
-        label_dependence=label_dependence, relabel=relabel_view,
+        label_dependence=label_dependence, relabel=relabel_view, outside=outside_view,
     )
     # Spec 002: conclusions belong to one run, and every figure they quote must be in
     # that run's public edition as it reads without them. Check before writing anything.
@@ -94,6 +118,7 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--variant", action="append", choices=list(BY_NAME), help="repeat to pick several; default all")
     r.add_argument("--cap", type=float, default=DEFAULT_CAP_USD, help="spend cap per variant in USD")
     r.add_argument("--limit", type=int, help="first N messages only, for a smoke test (reported as partial)")
+    r.add_argument("--question-set", default="current", help="definition set under data/definitions/ (spec 005); default: current")
     sub.add_parser("relabel", help="blind outside-model relabeling of the edited messages (spec 004); costs money")
     rep = sub.add_parser("report", help="rebuild both reports from a saved run, no provider calls")
     rep.add_argument("run_dir", nargs="?", type=Path, help="default: the latest run")
@@ -117,7 +142,7 @@ def main(argv: list[str] | None = None) -> None:
         if args.limit:
             dataset = dataset[: args.limit]
         variants = [BY_NAME[n] for n in args.variant] if args.variant else list(VARIANTS)
-        run_dir = run(variants, dataset, version, load_prices(), cap_usd=args.cap)
+        run_dir = run(variants, dataset, version, load_prices(), cap_usd=args.cap, question_set=args.question_set)
         print(f"results in {run_dir.relative_to(ROOT)}")
         if args.limit:
             print("smoke test: reports skipped, since they score against the full dataset")

@@ -7,6 +7,7 @@ a question may differ between variants (constitution Principle 1).
 import hashlib
 import json
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -53,15 +54,33 @@ QUESTIONS: tuple[Question, ...] = (
 BY_NAME: dict[str, Question] = {q.name: q for q in QUESTIONS}
 
 
-def questions_version() -> str:
+DEFINITIONS_DIR = Path(__file__).resolve().parent.parent / "data" / "definitions"
+CURRENT = "current"
+
+
+def load_set(name: str = CURRENT) -> tuple[Question, ...]:
+    """The four questions with a named set of definitions (spec 005).
+
+    Names and allowed labels never change between sets; only the question text does.
+    A set that the owner has not approved is refused, so it cannot be run by mistake."""
+    if name == CURRENT:
+        return QUESTIONS
+    record = json.loads((DEFINITIONS_DIR / f"{name}.json").read_text(encoding="utf-8"))
+    if not record.get("approved"):
+        raise ValueError(f"definition set {name!r} has not been approved by the owner")
+    text = record.get("final") or record["original"]
+    return tuple(Question(name=q.name, text=text[q.name], labels=q.labels) for q in QUESTIONS)
+
+
+def questions_version(questions: tuple[Question, ...] = QUESTIONS) -> str:
     """A hash of the request bodies both adapters build, in both shapes (all questions at
     once, and one at a time), with a placeholder message and without model, reasoning or
     routing fields. That covers the question text, the labels, the Claude prompt template
     and the Decisions request layout, so a change to any of them changes the version and a
-    report built from an older run says so (spec 001 B10)."""
+    report built from an older run says so (spec 001 B10, spec 003)."""
     from .providers import claude_request, decisions_request
 
-    shapes = [list(QUESTIONS)] + [[q] for q in QUESTIONS]
+    shapes = [list(questions)] + [[q] for q in questions]
     payload = json.dumps(
         {
             "claude": [claude_request("<message>", shape) for shape in shapes],

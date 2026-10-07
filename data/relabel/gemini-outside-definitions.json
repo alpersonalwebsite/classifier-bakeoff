@@ -1,0 +1,2873 @@
+{
+  "labeler_model": "google/gemini-3.1-pro-preview",
+  "labeler_vendor": "google",
+  "endpoint_requested": "google-vertex/global",
+  "served_by": [
+    "Google"
+  ],
+  "definitions": "outside-gemini",
+  "seed": 5,
+  "settings": {
+    "reasoning": {
+      "effort": "low"
+    },
+    "max_tokens": 4096,
+    "intent_labels": "one or two",
+    "spend_cap_usd": 2.5
+  },
+  "date": "20261007T225902Z",
+  "cost_usd": 1.02371,
+  "labels": {
+    "m018": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m119": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m103": {
+      "intent": [
+        "buy",
+        "general question"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m035": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m031": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m164": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m154": {
+      "intent": [
+        "valuation",
+        "sell"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m106": {
+      "intent": [
+        "valuation",
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m186": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m127": {
+      "intent": [
+        "valuation",
+        "buy"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m089": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m050": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m067": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m132": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m145": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m181": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m088": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m013": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m061": {
+      "intent": [
+        "buy",
+        "general question"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m094": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m082": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m025": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m069": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m059": {
+      "intent": [
+        "buy",
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m095": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m015": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m057": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m146": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m179": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m149": {
+      "intent": [
+        "sell",
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m112": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m138": {
+      "intent": [
+        "general question",
+        "buy"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m182": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m104": {
+      "intent": [
+        "buy",
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m055": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m178": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m110": {
+      "intent": [
+        "buy",
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m175": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m028": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m065": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m083": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m166": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m151": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m130": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m037": {
+      "intent": [
+        "rent",
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m009": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m197": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m022": {
+      "intent": [
+        "rent",
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m172": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m063": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m074": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m196": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m010": {
+      "intent": [
+        "buy",
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m141": {
+      "intent": [
+        "buy",
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m042": {
+      "intent": [
+        "buy",
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m030": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m137": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m153": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m174": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m039": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m090": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m102": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m117": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m118": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m116": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m007": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m021": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m062": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m073": {
+      "intent": [
+        "sell",
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m020": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m011": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m023": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m111": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m171": {
+      "intent": [
+        "buy",
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m040": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m086": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m070": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m169": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m084": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m170": {
+      "intent": [
+        "buy",
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m113": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m134": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m115": {
+      "intent": [
+        "valuation",
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m044": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m180": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m012": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m200": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m005": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m144": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m131": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m076": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m188": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m150": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m126": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m143": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m191": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m199": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m045": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m060": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m032": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m097": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m016": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m026": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m193": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m024": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m135": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m148": {
+      "intent": [
+        "buy",
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m058": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m162": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m108": {
+      "intent": [
+        "sell",
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m157": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m049": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m152": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m161": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m101": {
+      "intent": [
+        "sell",
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m071": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m123": {
+      "intent": [
+        "buy",
+        "general question"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m052": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m109": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m128": {
+      "intent": [
+        "buy",
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m185": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m122": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m003": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m129": {
+      "intent": [
+        "buy",
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m125": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m165": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m192": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m046": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m184": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m133": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m048": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m156": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m124": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m079": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m091": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m080": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m142": {
+      "intent": [
+        "valuation",
+        "sell"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m087": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m163": {
+      "intent": [
+        "rent",
+        "general question"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m078": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m085": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m017": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m068": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m038": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m158": {
+      "intent": [
+        "rent",
+        "general question"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m107": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m093": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m006": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m077": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m099": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m155": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m173": {
+      "intent": [
+        "valuation",
+        "sell"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m053": {
+      "intent": [
+        "buy",
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m139": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m051": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m081": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m075": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m189": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m043": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m176": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m054": {
+      "intent": [
+        "sell",
+        "buy"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m002": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m001": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m034": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m033": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m114": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m168": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m159": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m036": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m019": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m187": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m100": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m047": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m072": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m105": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m056": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m004": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m183": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m147": {
+      "intent": [
+        "sell",
+        "buy"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m027": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m140": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m098": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m195": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m121": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m096": {
+      "intent": [
+        "rent"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m029": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m041": {
+      "intent": [
+        "general question"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m014": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m194": {
+      "intent": [
+        "sell",
+        "valuation"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m064": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m120": {
+      "intent": [
+        "sell",
+        "buy"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m008": {
+      "intent": [
+        "buy"
+      ],
+      "timeline": [
+        "over 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m136": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "no"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m167": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m198": {
+      "intent": [
+        "valuation"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m177": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "high"
+      ]
+    },
+    "m092": {
+      "intent": [
+        "buy",
+        "general question"
+      ],
+      "timeline": [
+        "3 to 12 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m190": {
+      "intent": [
+        "buy",
+        "valuation"
+      ],
+      "timeline": [
+        "under 3 months"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m066": {
+      "intent": [
+        "sell"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    },
+    "m160": {
+      "intent": [
+        "not a lead"
+      ],
+      "timeline": [
+        "unknown"
+      ],
+      "wants_contact": [
+        "yes"
+      ],
+      "urgency": [
+        "normal"
+      ]
+    }
+  },
+  "failed": [],
+  "invalid": [],
+  "endpoint_note": "Requests allowed only google-vertex/global, with no fallback, so no other OpenRouter endpoint could serve them; responses name only the provider. service_tier_reported counts Google's own service_tier field per answered call, as reported; what its values mean was not verified.",
+  "service_tier_reported": {
+    "provisioned": 109,
+    "default": 91
+  }
+}
