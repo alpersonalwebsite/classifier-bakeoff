@@ -9,6 +9,7 @@ The rules every run follows are in [`constitution.md`](constitution.md), and the
 ## Results
 
 The latest public report is [`reports/public/20261007T194642Z-ba611a.html`](reports/public/20261007T194642Z-ba611a.html), from a run on 2026-10-07 over the frozen dataset with question text `sha256:2db74e1065302281`.
+Its conclusions, written for that run, are in [`reports/conclusions/20261007T194642Z-ba611a.md`](reports/conclusions/20261007T194642Z-ba611a.md) and appear at the top of the report.
 GitHub shows HTML as source, so download it and open it in a browser.
 
 ## Setup

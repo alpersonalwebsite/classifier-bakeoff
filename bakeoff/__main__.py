@@ -1,10 +1,12 @@
 """Command line: `uv run python -m bakeoff <command>`."""
 
 import argparse
+import json
 import os
 import sys
 from pathlib import Path
 
+from . import conclusions
 from . import dataset as ds
 from .report import load_withheld, render
 from .runner import RESULTS_DIR, run
@@ -34,12 +36,28 @@ def write_reports(run_dir: Path) -> tuple[Path, Path]:
         sys.exit(f"run {meta['run_id']} used dataset {meta['dataset_version']}, the frozen one is {version}")
     scores = score_run(meta, records, dataset)
     withheld = load_withheld()
+    dataset_meta = json.loads(ds.META_FILE.read_text())
+    args = dict(meta=meta, scores=scores, withheld=withheld, dataset_meta=dataset_meta)
+    # Spec 002: conclusions belong to one run, and every figure they quote must be in
+    # that run's public edition as it reads without them. Check before writing anything.
+    text = conclusions.load(meta["run_id"])
+    body = None
+    if text is not None:
+        problems = conclusions.check(text, render(public=True, **args))
+        if problems:
+            raise conclusions.ConclusionsError(
+                f"conclusions for {meta['run_id']} quote figures the report does not support; no report written:\n  "
+                + "\n  ".join(problems)
+            )
+        body = conclusions.to_html(text)
+    full_html = render(public=False, conclusions_html=body, **args)
+    public_html = render(public=True, conclusions_html=body, **args)
     FULL_DIR.mkdir(parents=True, exist_ok=True)
     PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
     full = FULL_DIR / f"{meta['run_id']}.html"
     public = PUBLIC_DIR / f"{meta['run_id']}.html"
-    full.write_text(render(meta, scores, public=False, withheld=withheld), encoding="utf-8")
-    public.write_text(render(meta, scores, public=True, withheld=withheld), encoding="utf-8")
+    full.write_text(full_html, encoding="utf-8")
+    public.write_text(public_html, encoding="utf-8")
     return full, public
 
 
