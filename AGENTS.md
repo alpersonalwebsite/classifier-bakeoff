@@ -10,7 +10,7 @@ The repository is public.
 - Work is spec driven: `specs/001-lead-triage-bakeoff.md` defines behavior and acceptance checks. A change to scope or behavior updates the spec in the same change, and new work starts with a new spec (`specs/002-…`).
 - Nothing tied to an employer or client goes in the repo, and the data stays fictional (555-0100 to 555-0199 phone numbers, `example.com` emails).
 - Never commit `results/`, `reports/full/`, `data/candidate*.jsonl`, `prices.local.json`, or `.env`; `.gitignore` covers them.
-- Result numbers appear only in the public report edition (`reports/public/`), never in commit messages, PR descriptions, or comments.
+- Result numbers appear only in the public report edition (`reports/public/`) and the written conclusions that feed it (`reports/conclusions/`), never in commit messages, PR descriptions, or comments.
 
 ## Layout
 
@@ -18,6 +18,7 @@ The repository is public.
 - `bakeoff/providers.py`: OpenRouter adapters (Decisions endpoint for Jev and Decisions, chat completions for Claude).
 - `bakeoff/variants.py`: the six variants, the $2 default cap, and three attempts per call.
 - `bakeoff/runner.py`, `scoring.py`, `report.py`: running, scoring, and the full and public report editions.
+- `bakeoff/conclusions.py` and `reports/conclusions/<run_id>.md`: written conclusions for one run (spec 002). Every figure they quote must appear exactly as printed in that run's public edition, or no report is written; the owner approves the text before it is committed.
 - `bakeoff/dataset.py`: generating, checking, and freezing the dataset.
 - `data/dataset.jsonl`: the frozen 200-message dataset; never edit it, since a run refuses a dataset whose hash changed. `data/label-changes.md` logs the review edits made before freezing.
 - `withheld.json`: figures the public edition removes (only `cost` is supported); currently empty.
@@ -27,7 +28,7 @@ The repository is public.
 
 ```sh
 uv sync
-uv run pytest                                   # 38 offline tests, no keys needed
+uv run pytest                                   # 50 offline tests, no keys needed
 uv run python -m bakeoff run --variant haiku-batched --limit 5   # smoke test, costs cents
 uv run python -m bakeoff run                    # full run, under $1; ask before running
 uv run python -m bakeoff report                 # rebuild reports from the latest saved run, no API calls
