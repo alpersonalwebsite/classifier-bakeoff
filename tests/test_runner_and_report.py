@@ -296,3 +296,17 @@ def test_run_records_the_question_text_version(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "run_variant", lambda v, *a, **k: runner.VariantOutcome(v.name))
     run_dir = runner.run([HAIKU], make_dataset(1), "sha256:test", {}, results_dir=tmp_path)
     assert json.loads((run_dir / "run.json").read_text())["questions_version"] == questions_version()
+
+
+def test_question_version_tracks_the_prompt_template_and_decisions_layout(monkeypatch):
+    from bakeoff import providers
+    from bakeoff.questions import questions_version
+
+    before = questions_version()
+    original = providers.claude_system_prompt
+    monkeypatch.setattr(providers, "claude_system_prompt", lambda qs: original(qs).replace("Labels:", "Options:"))
+    assert questions_version() != before  # the reviewer's probe: template wording
+    monkeypatch.undo()
+    original_req = providers.decisions_request
+    monkeypatch.setattr(providers, "decisions_request", lambda t, qs: {**original_req(t, qs), "extra": 1})
+    assert questions_version() != before  # Decisions request layout

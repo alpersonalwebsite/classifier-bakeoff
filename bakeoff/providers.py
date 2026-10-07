@@ -82,6 +82,17 @@ class _OpenRouter:
 # --- Jev and Decisions: OpenRouter's Decisions endpoint ----------------------
 
 
+def decisions_request(text: str, questions: list[Question]) -> dict:
+    """Everything a Decisions-endpoint model is told, without model or routing fields."""
+    return {
+        "state": text,
+        "questions": {
+            q.name: {"type": "choice", "instructions": q.text, "criteria": {label: None for label in q.labels}}
+            for q in questions
+        },
+    }
+
+
 class DecisionsRouterProvider(_OpenRouter):
     def __init__(self, model: str, vendor: str, inner: httpx2.BaseTransport | None = None):
         super().__init__(inner)
@@ -94,11 +105,7 @@ class DecisionsRouterProvider(_OpenRouter):
             "/alpha/decisions",
             {
                 "model": self.model,
-                "state": text,
-                "questions": {
-                    q.name: {"type": "choice", "instructions": q.text, "criteria": {label: None for label in q.labels}}
-                    for q in questions
-                },
+                **decisions_request(text, questions),
                 "provider": {"only": [self.vendor], "allow_fallbacks": False},
             },
         )
@@ -148,6 +155,22 @@ REASONING = {
 }
 
 
+def claude_request(text: str, questions: list[Question]) -> dict:
+    """Everything a Claude variant is told, without model, reasoning or routing fields
+    (reasoning is recorded per variant in its settings)."""
+    return {
+        "max_tokens": 256,
+        "messages": [
+            {"role": "system", "content": claude_system_prompt(questions)},
+            {"role": "user", "content": text},
+        ],
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {"name": "labels", "strict": True, "schema": claude_schema(questions)},
+        },
+    }
+
+
 class ClaudeProvider(_OpenRouter):
     def __init__(self, model: str, inner: httpx2.BaseTransport | None = None):
         super().__init__(inner)
@@ -160,15 +183,7 @@ class ClaudeProvider(_OpenRouter):
             "/v1/chat/completions",
             {
                 "model": self.model,
-                "max_tokens": 256,
-                "messages": [
-                    {"role": "system", "content": claude_system_prompt(questions)},
-                    {"role": "user", "content": text},
-                ],
-                "response_format": {
-                    "type": "json_schema",
-                    "json_schema": {"name": "labels", "strict": True, "schema": claude_schema(questions)},
-                },
+                **claude_request(text, questions),
                 "reasoning": self.reasoning,
                 "provider": {"only": ["anthropic"], "allow_fallbacks": False},
             },

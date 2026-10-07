@@ -54,13 +54,20 @@ BY_NAME: dict[str, Question] = {q.name: q for q in QUESTIONS}
 
 
 def questions_version() -> str:
-    """A hash of everything the models are told: every question's name, text and labels,
-    plus the one shared instruction the Claude variants get. A run records it, so a
-    report shows which wording produced its numbers (spec 001 B10)."""
-    from .providers import CLAUDE_INSTRUCTION
+    """A hash of the request bodies both adapters build, in both shapes (all questions at
+    once, and one at a time), with a placeholder message and without model, reasoning or
+    routing fields. That covers the question text, the labels, the Claude prompt template
+    and the Decisions request layout, so a change to any of them changes the version and a
+    report built from an older run says so (spec 001 B10)."""
+    from .providers import claude_request, decisions_request
 
+    shapes = [list(QUESTIONS)] + [[q] for q in QUESTIONS]
     payload = json.dumps(
-        {"questions": [[q.name, q.text, list(q.labels)] for q in QUESTIONS], "claude_instruction": CLAUDE_INSTRUCTION},
+        {
+            "claude": [claude_request("<message>", shape) for shape in shapes],
+            "decisions": [decisions_request("<message>", shape) for shape in shapes],
+        },
         ensure_ascii=False,
+        sort_keys=True,
     )
     return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
