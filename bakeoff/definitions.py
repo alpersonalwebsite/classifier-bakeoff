@@ -77,6 +77,7 @@ def draft(client: _OpenRouter | None = None) -> dict:
         "author_vendor": RATER_VENDOR,
         "model_reported": body.get("model"),
         "served_by": body.get("provider"),
+        "service_tier_reported": body.get("service_tier") or "not reported",
         "endpoint_requested": RATER_ENDPOINT,
         "date": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
         "cost_usd": call_cost(usage_from_response(body), None),

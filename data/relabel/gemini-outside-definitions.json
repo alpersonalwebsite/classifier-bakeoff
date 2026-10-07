@@ -2864,5 +2864,10 @@
     }
   },
   "failed": [],
-  "invalid": []
+  "invalid": [],
+  "endpoint_note": "Requests allowed only google-vertex/global, with no fallback, so no other OpenRouter endpoint could serve them; responses name only the provider. service_tier_reported counts Google's own service_tier field per answered call, as reported; what its values mean was not verified.",
+  "service_tier_reported": {
+    "provisioned": 109,
+    "default": 91
+  }
 }

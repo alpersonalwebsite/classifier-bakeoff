@@ -27,6 +27,12 @@ RATER_REASONING = {"effort": "low"}
 # 2026-10-07, Gemini spent about 243 of them reasoning and 36 of 72 answers were cut
 # off (finish_reason "length"). Wording is unchanged; only the budget differs.
 RATER_MAX_TOKENS = 4096
+# What a response does and does not say about where it ran (review of PR #8).
+ENDPOINT_NOTE = (
+    "Requests allowed only google-vertex/global, with no fallback, so no other OpenRouter endpoint could serve them; "
+    "responses name only the provider. service_tier_reported counts Google's own service_tier field per answered call, "
+    "as reported; what its values mean was not verified."
+)
 RATER_CAP_USD = 3.0
 OUTSIDE_CAP_USD = 2.5
 CONTROL_COUNT = 30
@@ -99,7 +105,7 @@ def run(items: list[dict], client: _OpenRouter | None = None, results_dir: Path 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out_dir = (results_dir or ROOT / "results") / f"relabel-{stamp}"
     out_dir.mkdir(parents=True, exist_ok=True)
-    labels, failed, served, models = {}, [], set(), set()
+    labels, failed, served, models, tiers = {}, [], set(), set(), {}
     spent, worst = 0.0, 0.0
     with (out_dir / "calls.jsonl").open("w", encoding="utf-8") as log:
         for item in items:
@@ -123,6 +129,9 @@ def run(items: list[dict], client: _OpenRouter | None = None, results_dir: Path 
                     served.add(body["provider"])
                 if isinstance(body, dict) and body.get("model"):
                     models.add(body["model"])
+                if isinstance(body, dict) and body.get("choices"):
+                    tier = body.get("service_tier") or "not reported"
+                    tiers[tier] = tiers.get(tier, 0) + 1
                 log.write(json.dumps({"blind_id": item["blind_id"], "attempt": attempt, "error": error, "request": ex.request_body if ex else None, "response": body, "cost_usd": cost}) + "\n")
                 if answers is not None:
                     labels[item["message_id"]] = {k: a.label for k, a in answers.items()}
@@ -137,6 +146,8 @@ def run(items: list[dict], client: _OpenRouter | None = None, results_dir: Path 
         "models_reported": sorted(models),
         "endpoint_requested": RATER_ENDPOINT,
         "served_by": sorted(served),
+        "endpoint_note": ENDPOINT_NOTE,
+        "service_tier_reported": tiers,
         "settings": {"reasoning": RATER_REASONING, "max_tokens": RATER_MAX_TOKENS, "structured_output": "strict JSON schema requested, labels only; JSON read from a code fence when the endpoint adds one", "spend_cap_usd": RATER_CAP_USD},
         "request_shape": "the Claude variants' batched request body for each message, unchanged",
         "blind_set": {"seed": SEED, "controls": CONTROL_COUNT, "messages": len(items)},
@@ -259,7 +270,7 @@ def run_outside(dataset: list[dict], questions, client: _OpenRouter | None = Non
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out_dir = (results_dir or ROOT / "results") / f"outside-labels-{stamp}"
     out_dir.mkdir(parents=True, exist_ok=True)
-    labels, failed, invalid, served, spent, worst = {}, [], [], set(), 0.0, 0.0
+    labels, failed, invalid, served, spent, worst, tiers = {}, [], [], set(), 0.0, 0.0, {}
     with (out_dir / "calls.jsonl").open("w", encoding="utf-8") as log:
         for i, mid in enumerate(order):
             done = False
@@ -280,6 +291,9 @@ def run_outside(dataset: list[dict], questions, client: _OpenRouter | None = Non
                     worst = max(worst, cost)
                 if isinstance(body, dict) and body.get("provider"):
                     served.add(body["provider"])
+                if isinstance(body, dict) and body.get("choices"):
+                    tier = body.get("service_tier") or "not reported"
+                    tiers[tier] = tiers.get(tier, 0) + 1
                 log.write(json.dumps({"blind_id": f"o{i + 1:03d}", "attempt": attempt, "error": error, "response": body, "cost_usd": cost}) + "\n")
                 if error is None:
                     done = True
@@ -293,7 +307,7 @@ def run_outside(dataset: list[dict], questions, client: _OpenRouter | None = Non
                 failed.append(mid)
     return {
         "labeler_model": RATER_MODEL, "labeler_vendor": RATER_VENDOR, "endpoint_requested": RATER_ENDPOINT,
-        "served_by": sorted(served), "definitions": "outside-gemini", "seed": OUTSIDE_SEED,
+        "served_by": sorted(served), "endpoint_note": ENDPOINT_NOTE, "service_tier_reported": tiers, "definitions": "outside-gemini", "seed": OUTSIDE_SEED,
         "settings": {"reasoning": RATER_REASONING, "max_tokens": RATER_MAX_TOKENS, "intent_labels": "one or two", "spend_cap_usd": OUTSIDE_CAP_USD},
         "date": stamp, "cost_usd": round(spent, 6), "labels": labels, "failed": failed, "invalid": invalid,
     }

@@ -133,6 +133,8 @@ def test_b6_the_record_carries_what_a_rerun_needs(tmp_path):
     for key in ("rater_model", "endpoint_requested", "settings", "request_shape", "blind_set", "date"):
         assert record[key], key
     assert record["blind_set"]["seed"] == relabel.SEED
+    assert record["service_tier_reported"] == {"not reported": 1}  # counted per answered call, as reported
+    assert "google-vertex/global" in record["endpoint_note"]
 
 
 def test_a_truncated_answer_is_retried_and_a_fenced_answer_is_read(tmp_path):

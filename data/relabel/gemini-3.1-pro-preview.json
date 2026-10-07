@@ -465,5 +465,10 @@
       "cost_usd": 0.2371,
       "reason": "harness bug: the 256-token output cap shared with the variants left no room for reasoning, so 36 of 72 answers were cut off; rerun in full with a 4096-token cap and no other change"
     }
-  ]
+  ],
+  "endpoint_note": "Requests allowed only google-vertex/global, with no fallback, so no other OpenRouter endpoint could serve them; responses name only the provider. service_tier_reported counts Google's own service_tier field per answered call, as reported; what its values mean was not verified.",
+  "service_tier_reported": {
+    "provisioned": 27,
+    "default": 45
+  }
 }

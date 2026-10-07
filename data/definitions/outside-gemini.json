@@ -25,5 +25,7 @@
   "approved_by": "repository owner",
   "approved_at": "2026-10-07",
   "approval_note": "approved as written, no edits",
-  "run_id": "20261007T231319Z-690b81"
+  "run_id": "20261007T231319Z-690b81",
+  "service_tier_reported": "not recorded: the drafting response was not kept",
+  "endpoint_note": "Requests allowed only google-vertex/global, with no fallback, so no other OpenRouter endpoint could serve them; responses name only the provider. service_tier_reported counts Google's own service_tier field per answered call, as reported; what its values mean was not verified.."
 }
