@@ -15,7 +15,7 @@ GitHub shows HTML as source, so download it and open it in a browser.
 
 ```sh
 uv sync
-echo "OPENROUTER_API_KEY=<your key>" > .env   # gitignored; never commit it
+cp .env.example .env   # then set OPENROUTER_API_KEY; .env is gitignored
 ```
 
 Cost comes from the `usage.cost` OpenRouter returns with every call.
