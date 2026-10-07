@@ -5,6 +5,7 @@ generator is Claude Opus 5.5 through OpenRouter, which is not a variant under te
 generator bias toward Claude remains an open risk in the spec.
 """
 
+import copy
 import hashlib
 import json
 import random
@@ -19,6 +20,7 @@ DATA_DIR = ROOT / "data"
 CANDIDATE_FILE = DATA_DIR / "candidate.jsonl"
 DATASET_FILE = DATA_DIR / "dataset.jsonl"
 META_FILE = DATA_DIR / "dataset.meta.json"
+LABEL_CHANGES_FILE = DATA_DIR / "label-changes.md"
 
 SIZE = 200
 MIN_PER_LABEL = 5
@@ -224,3 +226,28 @@ def load_frozen() -> tuple[list[dict], str]:
     if version != meta["version"]:
         raise ValueError(f"dataset changed after freezing ({version} != {meta['version']})")
     return read_jsonl(DATASET_FILE), version
+
+
+def original_rows(rows: list[dict], changes_file: Path | None = None) -> list[dict] | None:
+    """The dataset with every label the review changed put back as generated (spec 003 B6).
+
+    Rebuilt from the committed change log rather than a second copy. Returns None when
+    there is no log, and raises if a logged "new" label no longer matches the dataset,
+    since then the log does not describe this dataset."""
+    path = changes_file or LABEL_CHANGES_FILE
+    if not path.exists():
+        return None
+    out = copy.deepcopy(rows)
+    by_id = {r["id"]: r for r in out}
+    row_re = re.compile(r"^\| (m\d{3}) \| (\w+) \| ([^|]+) \| ([^|]+) \|")
+    for line in path.read_text(encoding="utf-8").splitlines():
+        m = row_re.match(line)
+        if not m:
+            continue
+        mid, question = m.group(1), m.group(2)
+        old = [x.strip() for x in m.group(3).split(" / ")]
+        new = [x.strip() for x in m.group(4).split(" / ")]
+        if by_id[mid]["truth"][question] != new:
+            raise ValueError(f"{path.name} does not match the dataset at {mid} {question}")
+        by_id[mid]["truth"][question] = old
+    return out

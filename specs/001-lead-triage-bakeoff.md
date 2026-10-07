@@ -1,6 +1,7 @@
 # 001: Lead triage classifier bakeoff
 
 **Status**: Implemented
+**Amended by**: spec 003 (variant ranking, report order, paired reference)
 **Created**: 2026-10-07
 
 ## Problem

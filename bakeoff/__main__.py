@@ -10,7 +10,7 @@ from . import conclusions
 from . import dataset as ds
 from .report import load_withheld, render
 from .runner import RESULTS_DIR, run
-from .scoring import load_run, score_run
+from .scoring import all_four_shares, load_run, score_run
 from .variants import BY_NAME, DEFAULT_CAP_USD, VARIANTS, load_prices
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -37,7 +37,13 @@ def write_reports(run_dir: Path) -> tuple[Path, Path]:
     scores = score_run(meta, records, dataset)
     withheld = load_withheld()
     dataset_meta = json.loads(ds.META_FILE.read_text())
-    args = dict(meta=meta, scores=scores, withheld=withheld, dataset_meta=dataset_meta)
+    # Spec 003 B6: results under the labels as generated beside the labels as frozen.
+    original = ds.original_rows(dataset)
+    label_dependence = None
+    if original is not None:
+        before, after = all_four_shares(meta, records, original), all_four_shares(meta, records, dataset)
+        label_dependence = {n: (before[n], after[n]) for n in after if n in before}
+    args = dict(meta=meta, scores=scores, withheld=withheld, dataset_meta=dataset_meta, label_dependence=label_dependence)
     # Spec 002: conclusions belong to one run, and every figure they quote must be in
     # that run's public edition as it reads without them. Check before writing anything.
     text = conclusions.load(meta["run_id"])
