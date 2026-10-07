@@ -1,0 +1,7 @@
+{
+  "_note": "USD per million tokens, keyed by OpenRouter model id. Used only when a response carries no cost, and to project the spend cap before the first call. Confirm on the run date. Jev's rate is not committed.",
+  "anthropic/claude-sonnet-5.5": {"input": 2.0, "output": 10.0, "source": "OpenRouter models API, read 2026-10-07"},
+  "anthropic/claude-haiku-4.5": {"input": 1.0, "output": 5.0, "source": "OpenRouter models API, read 2026-10-07"},
+  "anthropic/claude-opus-5.5": {"input": 4.0, "output": 20.0, "source": "OpenRouter models API, read 2026-10-07 (dataset generator only)"},
+  "openai/gpt-6-luna-decisions": {"input": 0.1, "output": 0.0, "source": "OpenRouter model endpoints API, read 2026-10-07"}
+}
