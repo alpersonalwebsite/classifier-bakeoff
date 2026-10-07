@@ -85,9 +85,100 @@ def test_b9_invalid_key_is_not_run(tmp_path):
     assert len(records) == 1
 
 
-def test_b9_server_errors_exhaust_retries(tmp_path):
-    outcome, records = _run(tmp_path, lambda r: json_response({"error": "boom"}, status=503), make_dataset(3))
-    assert outcome.status == "not run" and [r["attempt"] for r in records] == [1, 2, 3]
+def test_b9_server_errors_retry_then_stop_after_five_failed_messages(tmp_path):
+    outcome, records = _run(tmp_path, lambda r: json_response({"error": "boom"}, status=503), make_dataset(8))
+    assert [r["attempt"] for r in records[:3]] == [1, 2, 3]
+    assert len(records) == 15  # five messages, three attempts each, then stop
+    # It reached the provider, so it is partial, not "not run" (B9).
+    assert outcome.status == "partial" and "5 messages in a row" in outcome.reason
+
+
+def test_b9_a_400_on_the_first_message_does_not_end_the_variant(tmp_path):
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return json_response({"error": {"message": "bad request"}}, status=400)
+        return json_response(chat_body(ALL_RIGHT))
+
+    outcome, records = _run(tmp_path, handler, make_dataset(4))
+    assert outcome.status == "complete" and len(records) == 4  # 400 is not retried, run continues
+
+
+def test_402_out_of_credits_stops_the_variant_midway(tmp_path):
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        if calls["n"] > 2:
+            return json_response({"error": {"message": "Insufficient credits"}}, status=402)
+        return json_response(chat_body(ALL_RIGHT))
+
+    outcome, records = _run(tmp_path, handler, make_dataset(10))
+    assert outcome.status == "partial" and "out of credits" in outcome.reason and len(records) == 3
+
+
+def test_malformed_200_is_retried_not_scored(tmp_path):
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        return json_response({"id": "x"}) if calls["n"] == 1 else json_response(chat_body(ALL_RIGHT))
+
+    outcome, records = _run(tmp_path, handler, make_dataset(1))
+    assert [r["outcome"] for r in records] == ["failed", "completed"]
+    assert "MalformedResponse" in records[0]["error"]
+
+
+def test_b7_latency_includes_retry_backoff(tmp_path):
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise httpx2.ReadTimeout("t", request=request)
+        return json_response(chat_body(ALL_RIGHT))
+
+    data = make_dataset(1)
+    outcome, records = _run(tmp_path, handler, data)
+    assert records[1]["waited_before_s"] == 1.0
+    [s] = score_run(_meta({"haiku-batched": outcome}, {"haiku-batched": PRICE}), records, data)
+    assert s.latency_p50 >= 1.0
+
+
+def test_a_crashing_variant_still_yields_a_run_summary(tmp_path, monkeypatch):
+    from bakeoff import runner
+
+    def boom(*a, **k):
+        raise RuntimeError("unexpected")
+
+    monkeypatch.setattr(runner, "run_variant", boom)
+    run_dir = runner.run([HAIKU], make_dataset(1), "sha256:test", {}, results_dir=tmp_path)
+    meta = json.loads((run_dir / "run.json").read_text())
+    assert meta["variants"]["haiku-batched"]["status"] == "partial"
+    assert "crashed" in meta["variants"]["haiku-batched"]["reason"]
+
+
+def test_public_edition_omits_vendor_error_text(tmp_path):
+    secret_text = "upstream says: internal routing id 7f3a"
+    outcome, records = _run(tmp_path, lambda r: json_response({"error": {"message": secret_text}}, status=503), make_dataset(6))
+    meta = _meta({"haiku-batched": outcome}, {"haiku-batched": PRICE})
+    scores = score_run(meta, records, make_dataset(6))
+    assert secret_text not in render(meta, scores, public=True, withheld=[])
+    assert secret_text in render(meta, scores, public=False, withheld=[])
+
+
+def test_withheld_list_refuses_figures_it_cannot_remove(tmp_path):
+    from bakeoff.report import load_withheld
+
+    f = tmp_path / "withheld.json"
+    f.write_text(json.dumps([{"variant": "jev", "figure": "latency", "reason": "x"}]))
+    try:
+        load_withheld(f)
+    except ValueError:
+        return
+    raise AssertionError("an unremovable figure was accepted")
 
 
 def _report_fixture(tmp_path):
