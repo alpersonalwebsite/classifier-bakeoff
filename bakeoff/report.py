@@ -66,7 +66,31 @@ code { font-size:13px; }
 """
 
 
-def render(meta: dict, scores: list[VariantScore], public: bool, withheld: list[dict]) -> str:
+def dataset_note(dataset_meta: dict | None, models: dict[str, str]) -> str:
+    """Spec 002 B5: say the data is synthetic and who made it, from the frozen dataset's record."""
+    if not dataset_meta:
+        return '<p class="warn">Dataset: no record of how it was made was found.</p>'
+    gen = dataset_meta.get("generator", "an unrecorded model")
+    size = dataset_meta.get("size", "?")
+    note = f"Dataset: {size} synthetic messages, written by <code>{_e(gen)}</code> to match labels chosen first."
+    vendor = gen.split("/", 1)[0] if "/" in gen else None
+    same = sorted(name for name, model in models.items() if vendor and model.startswith(vendor + "/"))
+    if same:
+        note += (
+            f' <span class="warn">The generator\'s vendor ({_e(vendor)}) also makes variants in this run '
+            f"({_e(', '.join(same))}), which the wording of the data may favor.</span>"
+        )
+    return f"<p>{note}</p>"
+
+
+def render(
+    meta: dict,
+    scores: list[VariantScore],
+    public: bool,
+    withheld: list[dict],
+    dataset_meta: dict | None = None,
+    conclusions_html: str | None = None,
+) -> str:
     hidden_cost = {w["variant"] for w in withheld if w["figure"] == "cost"} if public else set()
     by_name = {s.name: s for s in scores}
     complete = sorted((s for s in scores if s.complete), key=lambda s: -s.correct["intent"])
@@ -95,6 +119,14 @@ def render(meta: dict, scores: list[VariantScore], public: bool, withheld: list[
         )
     if not public:
         parts.append('<p class="warn">Full edition: never commit this file (constitution Principle 6).</p>')
+    parts.append(dataset_note(dataset_meta, meta.get("models", {})))
+    if conclusions_html:
+        parts.append("<h2>Conclusions</h2>")
+        parts.append(
+            f'<p class="muted">Written analysis by the repository owner for run <code>{_e(meta["run_id"])}</code>, '
+            "not generated output. Every figure it quotes was checked against this report.</p>"
+        )
+        parts.append(f'<div class="conclusions">{conclusions_html}</div>')
 
     # Head-to-head, complete variants only (B9).
     rows = []
