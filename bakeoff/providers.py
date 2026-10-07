@@ -23,6 +23,10 @@ OPENROUTER_BASE = "https://openrouter.ai/api"
 TIMEOUT_SECONDS = 30.0
 
 
+class MalformedResponse(Exception):
+    """An HTTP 200 whose body is not the documented shape. Retried, never scored."""
+
+
 class HTTPStatusError(Exception):
     def __init__(self, status: int, body: str):
         super().__init__(f"HTTP {status}: {body[:300]}")
@@ -66,7 +70,13 @@ class _OpenRouter:
         response = self.http.post(f"{OPENROUTER_BASE}{path}", json=body)
         if response.status_code >= 400:
             raise HTTPStatusError(response.status_code, response.text)
-        return response.json()
+        try:
+            body = response.json()
+        except ValueError:
+            raise MalformedResponse("response body is not JSON") from None
+        if not isinstance(body, dict):
+            raise MalformedResponse("response body is not a JSON object")
+        return body
 
 
 # --- Jev and Decisions: OpenRouter's Decisions endpoint ----------------------
@@ -92,8 +102,9 @@ class DecisionsRouterProvider(_OpenRouter):
                 "provider": {"only": [self.vendor], "allow_fallbacks": False},
             },
         )
-        answers = body.get("answers") if isinstance(body, dict) else None
-        answers = answers if isinstance(answers, dict) else {}
+        answers = body.get("answers")
+        if not isinstance(answers, dict):
+            raise MalformedResponse("no answers object in the response")
         out = {}
         for q in questions:
             a = answers.get(q.name)
@@ -162,7 +173,10 @@ class ClaudeProvider(_OpenRouter):
                 "provider": {"only": ["anthropic"], "allow_fallbacks": False},
             },
         )
-        choice = (body.get("choices") or [{}])[0]
+        choices = body.get("choices")
+        if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+            raise MalformedResponse("no choices in the response")
+        choice = choices[0]
         message = choice.get("message") or {}
         if choice.get("finish_reason") in ("content_filter", "refusal") or message.get("refusal"):
             return {q.name: Answer("refused", None, message.get("refusal")) for q in questions}

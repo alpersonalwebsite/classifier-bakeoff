@@ -10,12 +10,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .costing import call_cost, usage_from_response
+from .providers import MalformedResponse
 from .questions import QUESTIONS
 from .variants import DEFAULT_CAP_USD, MAX_ATTEMPTS, Variant, make_provider
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 RETRYABLE_STATUSES = {408, 409, 429}
-AUTH_STATUSES = {401, 403}
+# Statuses that end a variant at once, because no later call can succeed. 403 is
+# deliberately absent: it may be a per-message refusal rather than an account problem
+# (unverified for OpenRouter), so it fails that message and the run moves on.
+STOP_STATUSES = {401: "authentication refused", 402: "out of credits"}
+# A variant that fails this many messages in a row stops, so a broken request shape or
+# a provider outage costs a handful of calls rather than the whole dataset.
+MAX_CONSECUTIVE_FAILED_MESSAGES = 5
 
 # Cap projection before any call has completed: a generous request and a full
 # output budget. Used only to decide whether the next call may start.
@@ -27,7 +34,8 @@ _INITIAL_OUTPUT_TOKENS = 256
 class VariantOutcome:
     variant: str
     status: str = "complete"  # complete | partial | not run
-    reason: str = ""
+    reason: str = ""  # short and vendor-free: it is printed in the public edition
+    detail: str = ""  # the last raw error, for the full edition only
     calls: int = 0
     completed_calls: int = 0
     unknown_token_calls: int = 0
@@ -41,9 +49,11 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _retryable(status: int | None) -> bool:
+def _retryable(status: int | None, malformed: bool) -> bool:
     # No HTTP status means the request never got an answer: timeout or connection error.
-    return status is None or status in RETRYABLE_STATUSES or status >= 500
+    # A 200 whose body is not the documented shape is retried too: it is a transport
+    # problem, not the model's answer.
+    return malformed or status is None or status in RETRYABLE_STATUSES or status >= 500
 
 
 class _Writer:
@@ -90,9 +100,20 @@ def run_variant(
         else None
     )
     worst_call = 0.0
+    reached_provider = False  # any HTTP response at all (B9)
+    consecutive_failed = 0
+
+    def finish(kind: str, reason: str) -> VariantOutcome:
+        # B9: "not run" only when nothing ever answered, or the key was refused outright.
+        never_answered = out.completed_calls == 0 and (not reached_provider or kind == "auth")
+        out.status = "not run" if never_answered else "partial"
+        out.reason = reason
+        return out
 
     for message in dataset:
+        message_failed = False
         for request_index, questions in enumerate(shapes):
+            waited = 0.0
             for attempt in range(1, MAX_ATTEMPTS + 1):
                 if max_calls is not None and out.calls >= max_calls:
                     out.status, out.reason = "partial", f"call cap of {max_calls} reached"
@@ -109,15 +130,17 @@ def run_variant(
                 provider.transport.reset()
                 started_at = _now()
                 t0 = time.perf_counter()
-                answers, error = None, None
+                answers, error, malformed = None, None, False
                 try:
                     answers = provider.ask(message["text"], questions)
                 except Exception as exc:
                     error = f"{type(exc).__name__}: {exc}"
+                    malformed = isinstance(exc, MalformedResponse)
                 latency = time.perf_counter() - t0
 
                 ex = provider.transport.last
                 status = ex.status if ex else None
+                reached_provider = reached_provider or status is not None
                 body = ex.response_body if ex else None
                 usage = usage_from_response(body) if answers is not None or status else None
                 cost = call_cost(usage, price)
@@ -151,6 +174,7 @@ def run_variant(
                         "error": error,
                         "http_status": status,
                         "latency_s": round(latency, 4),
+                        "waited_before_s": waited,  # retry backoff before this attempt (B7)
                         "started_at": started_at,
                         "request_url": ex.url if ex else None,
                         "request_headers": ex.request_headers if ex else None,
@@ -165,18 +189,30 @@ def run_variant(
 
                 if answers is not None:
                     break
-                if status in AUTH_STATUSES:
-                    out.status = "not run" if out.completed_calls == 0 else "partial"
-                    out.reason = f"authentication refused (HTTP {status}): {error}"
-                    return out
-                if not _retryable(status) or attempt == MAX_ATTEMPTS:
-                    if out.completed_calls == 0:
-                        # B9: never reached the provider at all.
-                        out.status, out.reason = "not run", f"no call completed; last error: {error}"
-                        return out
+                out.detail = error or ""
+                if status in STOP_STATUSES:
+                    return finish("auth" if status == 401 else "stop", f"{STOP_STATUSES[status]} (HTTP {status})")
+                if not _retryable(status, malformed) or attempt == MAX_ATTEMPTS:
+                    message_failed = True
                     break
-                sleep(2 ** (attempt - 1))
+                pause = 2 ** (attempt - 1)
+                sleep(pause)
+                waited = float(pause)
+        consecutive_failed = consecutive_failed + 1 if message_failed else 0
+        if consecutive_failed >= MAX_CONSECUTIVE_FAILED_MESSAGES:
+            last = f"HTTP {status}" if status is not None else "no response"
+            return finish("stop", f"{consecutive_failed} messages in a row failed (last: {last})")
     return out
+
+
+def _safe_run_variant(*args, **kwargs) -> VariantOutcome:
+    """A crash in one variant must not lose the run summary for all of them."""
+    try:
+        return run_variant(*args, **kwargs)
+    except Exception as exc:
+        out = VariantOutcome(args[0].name, status="partial", reason=f"runner crashed ({type(exc).__name__})")
+        out.detail = f"{type(exc).__name__}: {exc}"
+        return out
 
 
 def run(
@@ -192,14 +228,16 @@ def run(
     run_dir.mkdir(parents=True)
     writer = _Writer(run_dir / "calls.jsonl")
     started = _now()
-    # Variants run at the same time; calls inside one variant run one at a time.
-    with ThreadPoolExecutor(max_workers=len(variants)) as pool:
-        futures = {
-            v.name: pool.submit(run_variant, v, dataset, writer, run_id, prices.get(v.model), cap_usd)
-            for v in variants
-        }
-        outcomes = {name: f.result() for name, f in futures.items()}
-    writer.close()
+    try:
+        # Variants run at the same time; calls inside one variant run one at a time.
+        with ThreadPoolExecutor(max_workers=len(variants)) as pool:
+            futures = {
+                v.name: pool.submit(_safe_run_variant, v, dataset, writer, run_id, prices.get(v.model), cap_usd)
+                for v in variants
+            }
+            outcomes = {name: f.result() for name, f in futures.items()}
+    finally:
+        writer.close()
     meta = {
         "run_id": run_id,
         "started_at": started,

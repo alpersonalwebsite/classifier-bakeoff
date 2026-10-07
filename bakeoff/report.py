@@ -11,8 +11,17 @@ ROOT = Path(__file__).resolve().parent.parent
 WITHHELD_FILE = ROOT / "withheld.json"
 
 
-def load_withheld() -> list[dict]:
-    return json.loads(WITHHELD_FILE.read_text()) if WITHHELD_FILE.exists() else []
+# The only figure the public edition knows how to remove. Listing any other figure would
+# print it under Withheld while still showing it, so that is refused rather than trusted.
+WITHHOLDABLE = {"cost"}
+
+
+def load_withheld(path: Path = WITHHELD_FILE) -> list[dict]:
+    entries = json.loads(path.read_text()) if path.exists() else []
+    unknown = sorted({w.get("figure") for w in entries} - WITHHOLDABLE)
+    if unknown:
+        raise ValueError(f"withheld.json lists figures the public edition cannot remove: {unknown}")
+    return entries
 
 
 def _e(x: object) -> str:
@@ -177,10 +186,17 @@ def render(meta: dict, scores: list[VariantScore], public: bool, withheld: list[
     )
 
     if others:
-        rows = [[_e(s.name), _e(s.status), _pct(s.coverage), _e(s.reason or "some messages unclassified")] for s in others]
+        # The public edition shows only the runner's short reason; the raw vendor error,
+        # which may not be publishable (constitution Principle 6), is full edition only.
+        rows = [
+            [_e(s.name), _e(s.status), _pct(s.coverage), _e(s.reason or "some messages unclassified")]
+            + ([] if public else [f"<code>{_e(s.detail[:300])}</code>" if s.detail else ""])
+            for s in others
+        ]
         parts.append("<h2>Partial and not-run variants</h2>")
         parts.append("<p class='muted'>Left out of the head-to-head comparison (constitution Principle 3).</p>")
-        parts.append('<div class="scroll">' + _table(["Variant", "Status", "Coverage", "Reason"], rows) + "</div>")
+        headers = ["Variant", "Status", "Coverage", "Reason"] + ([] if public else ["Last error"])
+        parts.append('<div class="scroll">' + _table(headers, rows) + "</div>")
 
     rows = []
     for s in scores:

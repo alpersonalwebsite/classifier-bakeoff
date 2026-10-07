@@ -55,6 +55,7 @@ class VariantScore:
     status: str
     reason: str
     total_messages: int
+    detail: str = ""
     classified: int = 0
     calls: int = 0
     completed_calls: int = 0
@@ -99,6 +100,7 @@ def score_variant(name: str, meta_variant: dict, price: dict | None, records: li
         name=name,
         status=meta_variant.get("status", "complete"),
         reason=meta_variant.get("reason", ""),
+        detail=meta_variant.get("detail", ""),
         total_messages=len(dataset),
         settings=meta_variant.get("settings", {}),
         price_known=price is not None,
@@ -115,7 +117,8 @@ def score_variant(name: str, meta_variant: dict, price: dict | None, records: li
     final: dict[str, dict[str, dict]] = {}  # message -> question -> answer
     latency: dict[str, float] = {}
     for r in mine:
-        latency[r["message_id"]] = latency.get(r["message_id"], 0.0) + r["latency_s"]
+        # B7: everything a caller waits, retry backoff included.
+        latency[r["message_id"]] = latency.get(r["message_id"], 0.0) + r["latency_s"] + r.get("waited_before_s", 0.0)
         if r["outcome"] == "completed":
             final.setdefault(r["message_id"], {}).update(r["answers"])
 
@@ -152,9 +155,9 @@ def score_variant(name: str, meta_variant: dict, price: dict | None, records: li
             vs.cost_total = sum(r["cost_usd"] or 0.0 for r in mine)
             vs.cost_per_message = vs.cost_total / vs.classified
             vs.cost_is_lower_bound = vs.unknown_cost_calls > 0
-    if vs.status != "not run" and vs.completed_calls == 0:
-        vs.status = "not run"
-    elif vs.status == "complete" and not vs.complete:
+    # The runner decides "not run" (B9: nothing ever answered). Here a variant that
+    # finished its loop with unclassified messages is partial, whatever its call count.
+    if vs.status == "complete" and not vs.complete:
         vs.status = "partial"
     return vs
 
