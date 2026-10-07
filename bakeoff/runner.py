@@ -80,6 +80,7 @@ def run_variant(
     cap_usd: float,
     provider=None,
     sleep=time.sleep,
+    questions=QUESTIONS,
 ) -> VariantOutcome:
     out = VariantOutcome(variant.name)
     try:
@@ -89,7 +90,7 @@ def run_variant(
         return out
     out.settings = dict(provider.settings)
 
-    shapes = [list(QUESTIONS)] if variant.batched else [[q] for q in QUESTIONS]
+    shapes = [list(questions)] if variant.batched else [[q] for q in questions]
     first_attempt_calls = len(dataset) * len(shapes)
     # B8: with no known price, a call count that can never cut a full run short is the
     # backstop until the first reported cost lets the dollar cap take over.
@@ -222,7 +223,11 @@ def run(
     prices: dict[str, dict],
     cap_usd: float = DEFAULT_CAP_USD,
     results_dir: Path = RESULTS_DIR,
+    question_set: str = "current",
 ) -> Path:
+    from .questions import load_set
+
+    questions = load_set(question_set)
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:6]
     run_dir = results_dir / run_id
     run_dir.mkdir(parents=True)
@@ -232,7 +237,7 @@ def run(
         # Variants run at the same time; calls inside one variant run one at a time.
         with ThreadPoolExecutor(max_workers=len(variants)) as pool:
             futures = {
-                v.name: pool.submit(_safe_run_variant, v, dataset, writer, run_id, prices.get(v.model), cap_usd)
+                v.name: pool.submit(_safe_run_variant, v, dataset, writer, run_id, prices.get(v.model), cap_usd, questions=questions)
                 for v in variants
             }
             outcomes = {name: f.result() for name, f in futures.items()}
@@ -243,7 +248,8 @@ def run(
         "started_at": started,
         "finished_at": _now(),
         "dataset_version": dataset_version,
-        "questions_version": questions_version(),
+        "question_set": question_set,
+        "questions_version": questions_version(questions),
         "cap_usd": cap_usd,
         "billing_service": "OpenRouter",
         "prices": {v.name: prices.get(v.model) for v in variants},

@@ -61,6 +61,7 @@ h1 { font-size:24px; margin:0 0 4px; } h2 { font-size:18px; margin:32px 0 8px; }
 .scroll { overflow-x:auto; }
 table { border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
 th, td { border-bottom:1px solid var(--line); padding:6px 10px; text-align:left; white-space:nowrap; }
+.defs td { white-space:normal; min-width:16rem; vertical-align:top; }
 th { background:var(--head); font-weight:600; }
 code { font-size:13px; }
 """
@@ -92,6 +93,7 @@ def render(
     conclusions_html: str | None = None,
     label_dependence: dict[str, tuple[float, float]] | None = None,
     relabel: dict | None = None,
+    outside: dict | None = None,
 ) -> str:
     hidden_cost = {w["variant"] for w in withheld if w["figure"] == "cost"} if public else set()
     by_name = {s.name: s for s in scores}
@@ -121,10 +123,16 @@ def render(
         f'questions <code>{_e(meta.get("questions_version", "not recorded"))}</code> · '
         f'cap ${meta["cap_usd"]:.2f} per variant</p>',
     ]
-    if meta.get("questions_version") != questions_version():
+    from .questions import load_set
+
+    try:
+        expected = questions_version(load_set(meta.get("question_set", "current")))
+    except (OSError, ValueError, KeyError):
+        expected = None
+    if meta.get("questions_version") != expected:
         parts.append(
             '<p class="warn">This run used different question text from the current code '
-            f'(current <code>{_e(questions_version())}</code>), or did not record which, so rerunning '
+            f'(current <code>{_e(expected or "unavailable")}</code>), or did not record which, so rerunning '
             "today would not reproduce these numbers.</p>"
         )
     if not public:
@@ -297,6 +305,79 @@ def render(
         parts.append(f"<p><b>{_e(verdict)}</b> Only the {relabel['edited_count']} edited labels were replaced; every other label is as frozen.</p>")
         parts.append('<div class="scroll">' + _table(
             ["Variant", "Rank, frozen labels", "All four, frozen", "Rank, outside labels on the edits", "All four, outside"], rows) + "</div>")
+
+    # Spec 005 B4-B5: who wrote the definitions.
+    if outside:
+        d = outside["definitions"]
+        parts.append("<h2>Who wrote the definitions</h2>")
+        parts.append(
+            f"<p>The four questions' definitions were rewritten by <code>{_e(d['author_model'])}</code> ({_e(d['author_vendor'])}), "
+            "a vendor with no variant here, from the task, the question names and the allowed labels only, without seeing the "
+            f"current definitions or any message, and approved by the repository owner ({_e(d.get('approval_note', 'as written'))}). "
+            "The same model then labeled all 200 messages blind under them. It is one model's single pass, not ground truth, "
+            "and the question names and label words, shared by both versions, remain untested.</p>"
+        )
+        cols = [("current definitions, current labels", {s.name: s for s in complete}),
+                ("current definitions, outside labels", {s.name: s for s in outside["mid"]})]
+        if outside.get("full") is not None:
+            cols.append(("outside definitions, outside labels", {s.name: s for s in outside["full"]}))
+
+        def same(a: dict, b: dict) -> bool:
+            return all(n in b and (a[n].rank, a[n].tier) == (b[n].rank, b[n].tier) for n in a) and set(a) == set(b)
+
+        def top(c: dict) -> set:
+            return {n for n, s in c.items() if s.rank == 1}
+
+        rows = []
+        for s in complete:
+            row = [_e(s.name)]
+            for _, c in cols:
+                t = c.get(s.name)
+                row.append(f"{t.rank} (tier {t.tier}), {_pct(t.all_four / t.classified)}" if t else "not ranked")
+            rows.append(row)
+        verdicts = []
+        steps = [("The labels alone", cols[0][1], cols[1][1])]
+        if len(cols) == 3:
+            steps.append(("The definitions alone", cols[1][1], cols[2][1]))
+        for label, a, b in steps:
+            if same(a, b):
+                verdicts.append(f"{label}: rank 1 and every rank and tier are unchanged.")
+            elif top(a) == top(b):
+                verdicts.append(f"{label}: rank 1 is unchanged, some ranks or tiers move.")
+            else:
+                verdicts.append(f"{label}: rank 1 changes, from {', '.join(sorted(top(a)))} to {', '.join(sorted(top(b)))}.")
+        if len(cols) < 3:
+            verdicts.append("The run under the outside definitions has not been made yet.")
+        parts.append("<p><b>" + "</b><br><b>".join(_e(v) for v in verdicts) + "</b></p>")
+        parts.append('<div class="scroll">' + _table(["Variant", *[c for c, _ in cols]], rows) + "</div>")
+        vendors: dict[str, list[str]] = {}
+        for name, model in sorted(meta.get("models", {}).items()):
+            if name in cols[0][1]:
+                vendors.setdefault(model.split("/", 1)[0], []).append(name)
+        vrows = []
+        for vendor, names in sorted(vendors.items()):
+            vrows.append([_e(vendor)] + [", ".join(f"{_e(n)} {c[n].rank}" for n in names if n in c) for _, c in cols])
+        parts.append("<p class='muted'>Each vendor's variants and their ranks, column by column.</p>")
+        parts.append('<div class="scroll">' + _table(["Vendor", *[c for c, _ in cols]], vrows) + "</div>")
+        n = outside["notes"]
+        parts.append(
+            f"<p class='muted'>Under the outside labels, {n['two_intent']} messages have two intents (frozen labels: "
+            f"{n['frozen_two_intent']}), and wants_contact is \"no\" on {n['contact_no']} of {n['labeled']} messages "
+            f"(frozen labels: {n['frozen_contact_no']}). {n['left_out']} messages the labeler could not label are left out "
+            "of both outside columns.</p>"
+        )
+        if outside.get("full") is not None:
+            full = {s.name: s for s in outside["full"]}
+            rows = []
+            for s in complete:
+                t = full.get(s.name)
+                if t:
+                    rows.append([_e(s.name)] + [f"{_pct(s.accuracy(q.name))} → {_pct(t.accuracy(q.name))}" for q in QUESTIONS])
+            parts.append("<p class='muted'>Accuracy per question, current definitions and labels → outside definitions and labels.</p>")
+            parts.append('<div class="scroll">' + _table(["Variant", *[q.name for q in QUESTIONS]], rows) + "</div>")
+        parts.append("<h3>The two definition sets</h3>")
+        rows = [[_e(q.name), _e(q.text), _e(d["final"][q.name])] for q in QUESTIONS]
+        parts.append('<div class="scroll defs">' + _table(["Question", "Current (Claude session)", "Outside (" + d["author_model"] + ")"], rows) + "</div>")
 
     # Per-question accuracy, every variant that classified anything.
     rows = []

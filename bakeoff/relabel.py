@@ -28,6 +28,7 @@ RATER_REASONING = {"effort": "low"}
 # off (finish_reason "length"). Wording is unchanged; only the budget differs.
 RATER_MAX_TOKENS = 4096
 RATER_CAP_USD = 3.0
+OUTSIDE_CAP_USD = 2.5
 CONTROL_COUNT = 30
 SEED = 4
 RELABEL_DIR = ROOT / "data" / "relabel"
@@ -198,3 +199,115 @@ def check_independent(record: dict, models: dict[str, str]) -> None:
     vendors = {m.split("/", 1)[0] for m in models.values()}
     if record["rater_vendor"] in vendors:
         raise ValueError(f"rater vendor {record['rater_vendor']} also makes a variant in this run")
+
+
+# --- Spec 005: all 200 messages, labeled under the outside definitions ----------
+
+OUTSIDE_FILE = RELABEL_DIR / "gemini-outside-definitions.json"
+OUTSIDE_SEED = 5
+TWO_INTENTS = (
+    "For intent only, you may give two labels when the message clearly asks for two different "
+    "things; otherwise give one."
+)
+
+
+def outside_request(text: str, questions) -> dict:
+    """Spec 005 B2: the variants' prompt under the outside definitions, except that intent
+    may take two labels, as the frozen labels allow."""
+    from .providers import claude_system_prompt
+
+    props = {q.name: {"type": "string", "enum": list(q.labels)} for q in questions}
+    intent = next(q for q in questions if q.name == "intent")
+    props["intent"] = {"type": "array", "items": {"type": "string", "enum": list(intent.labels)}, "minItems": 1, "maxItems": 2}
+    return {
+        "model": RATER_MODEL,
+        "max_tokens": RATER_MAX_TOKENS,
+        "messages": [
+            {"role": "system", "content": claude_system_prompt(list(questions)) + "\n\n" + TWO_INTENTS},
+            {"role": "user", "content": text},
+        ],
+        "response_format": {"type": "json_schema", "json_schema": {"name": "labels", "strict": True, "schema": {
+            "type": "object", "properties": props, "required": [q.name for q in questions], "additionalProperties": False}}},
+        "reasoning": RATER_REASONING,
+        "provider": {"only": [RATER_ENDPOINT], "allow_fallbacks": False},
+    }
+
+
+def _parse_outside(body: dict, questions) -> dict[str, list[str]] | None:
+    choices = body.get("choices") or []
+    if not choices or choices[0].get("finish_reason") == "length":
+        raise ValueError("no complete answer")
+    match = re.search(r"\{.*\}", choices[0].get("message", {}).get("content") or "", flags=re.S)
+    data = json.loads(match.group(0)) if match else {}
+    out = {}
+    for q in questions:
+        value = data.get(q.name)
+        values = value if isinstance(value, list) else [value]
+        values = [v for v in values if v in q.labels][: 2 if q.name == "intent" else 1]
+        if not values:
+            return None  # an invalid answer: the message is left out, and counted
+        out[q.name] = list(dict.fromkeys(values))
+    return out
+
+
+def run_outside(dataset: list[dict], questions, client: _OpenRouter | None = None, results_dir: Path | None = None, sleep=time.sleep) -> dict:
+    client = client or _OpenRouter()
+    rng = random.Random(OUTSIDE_SEED)
+    order = [m["id"] for m in dataset]
+    rng.shuffle(order)
+    text = {m["id"]: m["text"] for m in dataset}
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out_dir = (results_dir or ROOT / "results") / f"outside-labels-{stamp}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    labels, failed, invalid, served, spent, worst = {}, [], [], set(), 0.0, 0.0
+    with (out_dir / "calls.jsonl").open("w", encoding="utf-8") as log:
+        for i, mid in enumerate(order):
+            done = False
+            for attempt in range(1, 4):
+                if spent + worst > OUTSIDE_CAP_USD:
+                    break
+                client.transport.reset()
+                error, answer = None, None
+                try:
+                    answer = _parse_outside(client.post("/v1/chat/completions", outside_request(text[mid], questions)), questions)
+                except Exception as exc:
+                    error = f"{type(exc).__name__}: {exc}"
+                ex = client.transport.last
+                body = ex.response_body if ex else None
+                cost = call_cost(usage_from_response(body), None)
+                if cost is not None:
+                    spent += cost
+                    worst = max(worst, cost)
+                if isinstance(body, dict) and body.get("provider"):
+                    served.add(body["provider"])
+                log.write(json.dumps({"blind_id": f"o{i + 1:03d}", "attempt": attempt, "error": error, "response": body, "cost_usd": cost}) + "\n")
+                if error is None:
+                    done = True
+                    if answer is None:
+                        invalid.append(mid)
+                    else:
+                        labels[mid] = answer
+                    break
+                sleep(2 ** (attempt - 1))
+            if not done:
+                failed.append(mid)
+    return {
+        "labeler_model": RATER_MODEL, "labeler_vendor": RATER_VENDOR, "endpoint_requested": RATER_ENDPOINT,
+        "served_by": sorted(served), "definitions": "outside-gemini", "seed": OUTSIDE_SEED,
+        "settings": {"reasoning": RATER_REASONING, "max_tokens": RATER_MAX_TOKENS, "intent_labels": "one or two", "spend_cap_usd": OUTSIDE_CAP_USD},
+        "date": stamp, "cost_usd": round(spent, 6), "labels": labels, "failed": failed, "invalid": invalid,
+    }
+
+
+def outside_dataset(dataset: list[dict], record: dict) -> list[dict]:
+    """The frozen messages with every label replaced by the outside labels (spec 005 B3).
+    Messages the labeler could not label are dropped, so every variant is scored on the same set."""
+    import copy
+
+    out = []
+    for m in dataset:
+        if m["id"] in record["labels"]:
+            row = copy.deepcopy(m)
+            row["truth"] = {q: list(v) for q, v in record["labels"][m["id"]].items()}
+            out.append(row)
+    return out
