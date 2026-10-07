@@ -128,3 +128,27 @@ def test_b5_report_states_synthetic_data_and_shared_vendor(tmp_path):
     page = conclusions.page_text(_public(meta, scores))
     assert "synthetic" in page and "anthropic/claude-opus-5.5" in page
     assert "also makes variants in this run (haiku-batched)" in page
+
+
+def test_b3_a_figure_must_match_a_whole_printed_figure_not_part_of_one(tmp_path):
+    meta, scores = _report_inputs(tmp_path)
+    page = _public(meta, scores)
+    shown = conclusions.page_text(page)
+    printed = {fig for fig, _ in conclusions.figures(shown)}
+    # "00.0%" is the tail of the printed "100.0%" but is never printed on its own.
+    assert "100.0%" in printed and "00.0%" not in printed and "00.0%" in shown
+    assert conclusions.check("Intent was 00.0%.", page)
+    cost = f"{scores[0].cost_per_message:.6f}"
+    assert conclusions.check(f"It costs at least ${cost[:-1]}.", page)  # a truncated dollar figure
+
+
+def test_reviewers_cases_against_the_published_report():
+    """The three cases from the PR #5 review, on the real committed report."""
+    from pathlib import Path
+
+    pub = (Path(__file__).resolve().parent.parent / "reports/public/20261007T194642Z-ba611a.html").read_text()
+    start = pub.index("<h2>Conclusions</h2>")
+    without = pub[:start] + pub[pub.index("<h2>", start + 5):]
+    for wrong in ("Jev trails by 4.0% on intent.", "Haiku reaches 5.5% on intent.", "Decisions costs $0.00006 per message."):
+        assert conclusions.check(wrong, without), wrong
+    assert conclusions.check("Decisions is 94.0% on intent at $0.000062.", without) == []

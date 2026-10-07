@@ -50,14 +50,20 @@ def page_text(page_html: str) -> str:
 
 
 def check(conclusions: str, public_without_conclusions: str) -> list[str]:
-    """Problems with the quoted figures; an empty list means every figure is supported."""
-    shown = page_text(public_without_conclusions)
+    """Problems with the quoted figures; an empty list means every figure is supported.
+
+    The report's figures are extracted with the same pattern and compared as whole
+    tokens. A substring test let "4.0%" pass because the report prints "94.0%", and
+    "$0.00006" pass inside "$0.000062" (review of PR #5)."""
+    printed = figures(page_text(public_without_conclusions))
+    plain = {fig for fig, marked in printed if not marked}
+    bounded = {fig for fig, marked in printed if marked}
     problems = []
     for fig, marked in figures(conclusions):
-        if fig not in shown:
+        if fig not in plain and fig not in bounded:
             problems.append(f"{fig}: not printed in the public report")
-        elif f"≥ {fig}" in shown and not marked:
-            problems.append(f"{fig}: the report shows it as a lower bound, so quote it as '≥ {fig}' or 'at least {fig}'")
+        elif fig in bounded and fig not in plain and not marked:
+            problems.append(f"{fig}: the report shows it only as a lower bound, so quote it as '≥ {fig}' or 'at least {fig}'")
     return sorted(set(problems))
 
 
