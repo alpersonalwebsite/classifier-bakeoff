@@ -275,3 +275,24 @@ def test_b8_no_price_still_gets_a_dollar_cap_once_costs_are_reported(tmp_path):
     outcome, records = _run(tmp_path, lambda r: json_response(chat_body(ALL_RIGHT, cost=0.3)), make_dataset(20), price=None, cap=1.0)
     assert outcome.status == "partial" and "spend cap" in outcome.reason
     assert outcome.spend_known_usd <= 1.0 and len(records) == 3
+
+
+def test_b10_report_flags_a_run_made_with_other_question_text(tmp_path):
+    from bakeoff.questions import questions_version
+
+    outcome, records = _run(tmp_path, lambda r: json_response(chat_body(ALL_RIGHT)), make_dataset(2))
+    meta = _meta({"haiku-batched": outcome}, {"haiku-batched": PRICE})
+    scores = score_run(meta, records, make_dataset(2))
+    assert "different question text" in render(meta, scores, public=True, withheld=[])  # none recorded
+    meta["questions_version"] = questions_version()
+    page = render(meta, scores, public=True, withheld=[])
+    assert "different question text" not in page and questions_version() in page
+
+
+def test_run_records_the_question_text_version(tmp_path, monkeypatch):
+    from bakeoff import runner
+    from bakeoff.questions import questions_version
+
+    monkeypatch.setattr(runner, "run_variant", lambda v, *a, **k: runner.VariantOutcome(v.name))
+    run_dir = runner.run([HAIKU], make_dataset(1), "sha256:test", {}, results_dir=tmp_path)
+    assert json.loads((run_dir / "run.json").read_text())["questions_version"] == questions_version()

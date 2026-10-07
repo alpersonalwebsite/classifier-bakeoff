@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .costing import call_cost, usage_from_response
 from .providers import MalformedResponse
-from .questions import QUESTIONS
+from .questions import QUESTIONS, questions_version
 from .variants import DEFAULT_CAP_USD, MAX_ATTEMPTS, Variant, make_provider
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
@@ -243,6 +243,7 @@ def run(
         "started_at": started,
         "finished_at": _now(),
         "dataset_version": dataset_version,
+        "questions_version": questions_version(),
         "cap_usd": cap_usd,
         "billing_service": "OpenRouter",
         "prices": {v.name: prices.get(v.model) for v in variants},

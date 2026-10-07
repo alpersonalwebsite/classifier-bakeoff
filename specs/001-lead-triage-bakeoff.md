@@ -97,7 +97,7 @@ A response whose body is not the documented shape is a failed call and is retrie
 A crash in one variant ends that variant as partial and does not lose the others' results.
 A variant that classified fewer than all 200 messages is reported with its coverage and left out of the head-to-head ranking.
 
-**B10. Report.** A local HTML report with: the head-to-head table (accuracy with a 95% confidence interval, invalid rate, cost per message, p50 and p95 latency) for complete variants; for each complete variant, a 95% paired confidence interval on its intent accuracy difference from the best variant, computed over the same messages; per-question accuracy; vendor-native tokens per message; partial and not-run variants listed separately with the reason; and the run date, dataset version, billing service, and the model identifiers and serving providers each response reported.
+**B10. Report.** A local HTML report with: the head-to-head table (accuracy with a 95% confidence interval, invalid rate, cost per message, p50 and p95 latency) for complete variants; for each complete variant, a 95% paired confidence interval on its intent accuracy difference from the best variant, computed over the same messages; per-question accuracy; vendor-native tokens per message; partial and not-run variants listed separately with the reason; and the run date, dataset version, a version of the question text the models were given, billing service, and the model identifiers and serving providers each response reported.
 
 **B11. Two editions.** Every report is produced in two editions from the same results.
 The full edition contains everything and is never committed.
@@ -114,6 +114,7 @@ A variant whose cost is withheld is left out of every cost ranking in the public
 - **B11.** Given Jev cost is withheld, when the public edition renders, then Jev appears in no cost ranking, not even as a position with its number blanked, and each cost ranking names Jev as excluded.
 - **B11.** Given a fresh clone of the repository after a run is committed, when it is searched, then no full-edition report or raw results file is present.
 - **B2.** Given a candidate dataset containing one message with the phone number 206-555-0247 (outside the reserved 0100 to 0199 block) or the email jane@gmail.com, when the pre-freeze check runs, then that message is rejected and the dataset is not frozen.
+- **B10.** Given a saved run whose question text differs from the current code, or that recorded none, when its report is rebuilt, then the report says the run used different question text.
 - **B4.** Given saved results and no network access, when the report is rebuilt, then it is produced with the same numbers and no provider is called.
 - **B5.** Given a run where one call timed out and its retry succeeded, when the records are read, then both attempts are present, the first with tokens unknown.
 - **B5.** Given any finished run, when every record and the report are searched for each key in `.env`, then none is found.

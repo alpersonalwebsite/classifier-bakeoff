@@ -4,7 +4,7 @@ import html
 import json
 from pathlib import Path
 
-from .questions import QUESTIONS
+from .questions import QUESTIONS, questions_version
 from .scoring import VariantScore
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -84,8 +84,15 @@ def render(meta: dict, scores: list[VariantScore], public: bool, withheld: list[
         f"<h1>Lead triage classifier bakeoff</h1>",
         f'<p class="muted">{"Public" if public else "Full"} edition · run <code>{_e(meta["run_id"])}</code> · '
         f'{_e(meta["started_at"][:10])} · dataset <code>{_e(meta["dataset_version"])}</code> · '
+        f'questions <code>{_e(meta.get("questions_version", "not recorded"))}</code> · '
         f'cap ${meta["cap_usd"]:.2f} per variant</p>',
     ]
+    if meta.get("questions_version") != questions_version():
+        parts.append(
+            '<p class="warn">This run used different question text from the current code '
+            f'(current <code>{_e(questions_version())}</code>), or did not record which, so rerunning '
+            "today would not reproduce these numbers.</p>"
+        )
     if not public:
         parts.append('<p class="warn">Full edition: never commit this file (constitution Principle 6).</p>')
 

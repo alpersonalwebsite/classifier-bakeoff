@@ -4,6 +4,8 @@ Every provider receives exactly this text and these labels. Nothing else about
 a question may differ between variants (constitution Principle 1).
 """
 
+import hashlib
+import json
 from dataclasses import dataclass
 
 
@@ -49,3 +51,16 @@ QUESTIONS: tuple[Question, ...] = (
 )
 
 BY_NAME: dict[str, Question] = {q.name: q for q in QUESTIONS}
+
+
+def questions_version() -> str:
+    """A hash of everything the models are told: every question's name, text and labels,
+    plus the one shared instruction the Claude variants get. A run records it, so a
+    report shows which wording produced its numbers (spec 001 B10)."""
+    from .providers import CLAUDE_INSTRUCTION
+
+    payload = json.dumps(
+        {"questions": [[q.name, q.text, list(q.labels)] for q in QUESTIONS], "claude_instruction": CLAUDE_INSTRUCTION},
+        ensure_ascii=False,
+    )
+    return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
