@@ -74,7 +74,7 @@ def _inline(text: str) -> str:
 
 
 def to_html(text: str) -> str:
-    """Paragraphs, `- ` lists and **bold** / *italic* only; everything else is escaped text."""
+    """Paragraphs, `- ` and `1. ` lists, and **bold** / *italic* only; everything else is escaped text."""
     blocks = [b for b in re.split(r"\n\s*\n", text.strip()) if b.strip()]
     out = []
     for block in blocks:
@@ -82,6 +82,9 @@ def to_html(text: str) -> str:
         if all(line.lstrip().startswith("- ") for line in lines):
             items = "".join(f"<li>{_inline(line.lstrip()[2:])}</li>" for line in lines)
             out.append(f"<ul>{items}</ul>")
+        elif all(re.match(r"\s*\d+\. ", line) for line in lines):
+            items = "".join(f"<li>{_inline(re.sub(r'^\s*\d+\. ', '', line))}</li>" for line in lines)
+            out.append(f"<ol>{items}</ol>")
         else:
             out.append(f"<p>{_inline(' '.join(line.strip() for line in lines))}</p>")
     return "".join(out)
