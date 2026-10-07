@@ -206,9 +206,15 @@ def rank_variants(complete: list[VariantScore]) -> list[VariantScore]:
         leader = remaining[0]
         members = [s for s in remaining if (lambda m, lo, hi: lo <= 0 <= hi)(*_paired(s, leader, "all_four_vector"))]
         members.sort(key=_order_key)
+        # Identical answers always fall in one tier; keep each such group together, at
+        # the position of its cheapest member, so ranks never read 1, 2, 1.
+        grouped: list[VariantScore] = []
         for s in members:
+            if s not in grouped:
+                grouped.extend(t for t in members if t.signature == s.signature)
+        for s in grouped:
             s.tier = tier
-        ordered.extend(members)
+        ordered.extend(grouped)
         remaining = [s for s in remaining if s not in members]
     rank_of: dict[tuple, int] = {}
     for s in ordered:

@@ -133,3 +133,11 @@ def test_b6_label_dependence_is_shown_with_its_limits_and_who_reviewed():
 def test_withheld_cost_hides_the_position_inside_a_tier():
     page = render(META, _ranked_six(), public=True, withheld=[{"variant": "v-dear", "figure": "cost", "reason": "r"}])
     assert "tier 1, position withheld" in page
+
+
+def test_b1_identical_answers_stay_together_when_another_cost_falls_between():
+    right = shared_right(169)
+    ranked = rank_variants(
+        [variant("twin-a", right, 0.0001, signature="S"), variant("other", right, 0.0002, signature="T"), variant("twin-b", right, 0.0003, signature="S")]
+    )
+    assert [(s.name, s.rank) for s in ranked] == [("twin-a", 1), ("twin-b", 1), ("other", 2)]
