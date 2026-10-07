@@ -107,6 +107,7 @@ def test_b3_a_failing_check_writes_no_edition(tmp_path, monkeypatch):
     meta_file = tmp_path / "dataset.meta.json"
     meta_file.write_text(json.dumps(GEN))
     monkeypatch.setattr(cli.ds, "META_FILE", meta_file)
+    monkeypatch.setattr(cli.ds, "LABEL_CHANGES_FILE", tmp_path / "no-label-log.md")
     monkeypatch.setattr(cli, "FULL_DIR", tmp_path / "full")
     monkeypatch.setattr(cli, "PUBLIC_DIR", tmp_path / "public")
     (tmp_path / "concl").mkdir()
@@ -152,3 +153,8 @@ def test_reviewers_cases_against_the_published_report():
     for wrong in ("Jev trails by 4.0% on intent.", "Haiku reaches 5.5% on intent.", "Decisions costs $0.00006 per message."):
         assert conclusions.check(wrong, without), wrong
     assert conclusions.check("Decisions is 94.0% on intent at $0.000062.", without) == []
+
+
+def test_b4_numbered_lists_render_as_ordered_lists():
+    out = conclusions.to_html("1. first <b>\n2. second")
+    assert out == "<ol><li>first &lt;b&gt;</li><li>second</li></ol>"
