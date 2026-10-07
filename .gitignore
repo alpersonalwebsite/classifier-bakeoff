@@ -1,0 +1,28 @@
+# Secrets and env
+.env*
+*.env
+!.env.example
+secrets/
+credentials*
+*.pem
+*.key
+
+# Logs and local data
+*.log
+*.sqlite
+*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node and OS
+node_modules/
+.DS_Store
+
+# Bakeoff outputs that never leave this machine (spec 001 B5, B11)
+results/
+reports/full/
+data/candidate*.jsonl
+prices.local.json
