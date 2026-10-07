@@ -108,6 +108,7 @@ def test_b3_a_failing_check_writes_no_edition(tmp_path, monkeypatch):
     meta_file.write_text(json.dumps(GEN))
     monkeypatch.setattr(cli.ds, "META_FILE", meta_file)
     monkeypatch.setattr(cli.ds, "LABEL_CHANGES_FILE", tmp_path / "no-label-log.md")
+    monkeypatch.setattr(cli.relabel, "RELABEL_FILE", tmp_path / "no-relabel.json")
     monkeypatch.setattr(cli, "FULL_DIR", tmp_path / "full")
     monkeypatch.setattr(cli, "PUBLIC_DIR", tmp_path / "public")
     (tmp_path / "concl").mkdir()

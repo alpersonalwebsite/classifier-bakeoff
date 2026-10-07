@@ -21,6 +21,7 @@ The repository is public.
 - `bakeoff/conclusions.py` and `reports/conclusions/<run_id>.md`: written conclusions for one run (spec 002). Every figure they quote must appear exactly as printed in that run's public edition, or no report is written; the owner approves the text before it is committed.
 - `bakeoff/dataset.py`: generating, checking, and freezing the dataset.
 - `data/dataset.jsonl`: the frozen 200-message dataset; never edit it, since a run refuses a dataset whose hash changed. `data/label-changes.md` logs the review edits made before freezing, and reports rebuild the pre-review labels from it; `data/dataset.meta.json` records who made and reviewed the data, which reports print.
+- `bakeoff/relabel.py` and `data/relabel/`: the blind relabeling of the edited messages by a model whose vendor has no variant (spec 004), and its committed record, which reports compare against.
 - `withheld.json`: figures the public edition removes (only `cost` is supported); currently empty.
 - `prices.json`: fallback rates only; cost comes from OpenRouter's `usage.cost`.
 
@@ -28,10 +29,11 @@ The repository is public.
 
 ```sh
 uv sync
-uv run pytest                                   # 66 offline tests, no keys needed
+uv run pytest                                   # 77 offline tests, no keys needed
 uv run python -m bakeoff run --variant haiku-batched --limit 5   # smoke test, costs cents
 uv run python -m bakeoff run                    # full run, under $1; ask before running
 uv run python -m bakeoff report                 # rebuild reports from the latest saved run, no API calls
+uv run python -m bakeoff relabel                # blind outside-model relabeling (spec 004), under $1; ask before running
 ```
 
 A full run, generation, or any call that spends money needs the owner's go-ahead first.
