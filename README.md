@@ -10,7 +10,7 @@ The rules every run follows are in [`constitution.md`](constitution.md), and the
 
 ```sh
 uv sync
-cp .env.example .env   # then set OPENROUTER_API_KEY
+echo "OPENROUTER_API_KEY=<your key>" > .env   # gitignored; never commit it
 ```
 
 Cost comes from the `usage.cost` OpenRouter returns with every call.

@@ -33,7 +33,7 @@ QUESTIONS: tuple[Question, ...] = (
         name="wants_contact",
         text=(
             "Does the sender ask for a reply addressed to them, by call, text, email, or a meeting? "
-            "A post on a website or portal does not count."
+            "A post or reply on a website, portal, web form, or chat widget does not count."
         ),
         labels=("yes", "no"),
     ),
@@ -41,8 +41,8 @@ QUESTIONS: tuple[Question, ...] = (
         name="urgency",
         text=(
             "How urgent is the sender's request? "
-            "Answer high only when the message names a deadline or forced move within about four weeks; "
-            "otherwise answer normal."
+            "Answer high only when the message names a deadline or forced move within five weeks. "
+            "A general wish for speed with no date is normal."
         ),
         labels=("high", "normal"),
     ),

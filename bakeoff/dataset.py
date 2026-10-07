@@ -128,8 +128,8 @@ Rules for every message:
 What the labels mean:
 - intent: what the sender wants (buy, sell, rent, valuation, general question, or not a lead such as spam, a vendor pitch, or a wrong number). When a spec lists two intents, the message must clearly mention both, without making one obviously the main one.
 - timeline: when the move or transaction happens, not when an answer or a valuation is needed. "unknown" means the message gives no time for it.
-- wants_contact: "yes" only if the sender asks for a reply addressed to them, by call, text, email, or a meeting. A post on a website or portal does not count.
-- urgency: "high" only when the message names a deadline or forced move within about four weeks.
+- wants_contact: "yes" only if the sender asks for a reply addressed to them, by call, text, email, or a meeting. A post or reply on a website, portal, web form, or chat widget does not count.
+- urgency: "high" only when the message names a deadline or forced move within five weeks; a general wish for speed with no date is normal.
 
 Specs:
 {specs}

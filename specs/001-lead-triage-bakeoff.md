@@ -37,8 +37,10 @@ Without a head-to-head on the same messages, choosing one for production lead tr
 
 Each question's text defines its terms, so a model never has to guess a reading only the dataset author knows:
 - timeline counts when the move or transaction (buy, sell, rent, move) happens, not when an answer or a valuation is needed, and is unknown when the message gives no time for it;
-- wants_contact is yes for a request for a reply addressed to the sender, by call, text, email, or a meeting, and a post on a website or portal does not count;
-- urgency is high only when the message names a deadline or forced move within about four weeks, and normal otherwise, including for a general wish for speed with no date.
+- wants_contact is yes for a request for a reply addressed to the sender, by call, text, email, or a meeting, and a post or reply on a website, portal, web form, or chat widget does not count;
+- urgency is high only when the message names a deadline or forced move within five weeks, and a general wish for speed with no date is normal.
+
+The question text in the code says exactly this, so the definitions the labels follow are the definitions every model is given.
 
 The question text and label wording are identical for every variant.
 A message that mentions two intents has both as acceptable answers in its ground truth, and either one scores as correct.
@@ -70,6 +72,7 @@ A variant can also be run on its own, and the report can be rebuilt from saved r
 
 **B5. Call record.** Every call, including retries and failures, is saved with: variant, message, the full request as sent (minus auth), attempt number, outcome (answered, invalid, refused, failed), returned labels, latency, the provider that served it, and the token counts and cost exactly as the billing service returned them, or unknown if it returned none.
 No API key or auth header appears in any record.
+The public edition shows each partial or not-run variant's reason in the runner's own words, never a vendor's error text, which appears in the full edition only.
 Call records stay on the machine that ran the bakeoff and are never committed, since they hold full vendor responses; the committed dataset and code are enough for anyone to rerun it with their own keys.
 
 **B6. Scoring.** Per variant and per question: accuracy against ground truth, and the rate of invalid or refused answers.
@@ -84,10 +87,14 @@ In any cost ranking a lower-bound variant is marked as such, and if one ranks ch
 A variant with no known price shows cost as unknown and is excluded from any cost ranking, with the reason stated.
 
 **B8. Spend cap.** Each variant stops once its estimated spend would pass its cap, $2 by default and settable per run.
+A variant also stops at once on a refused key or exhausted credits, and after five messages in a row fail, so a broken request or an outage costs a handful of calls rather than the dataset.
 A variant with no known price stops after a fixed number of calls instead, set before the run and never below what the full dataset needs with every retry used (three times its first-attempt calls), so the cap alone cannot make it partial.
 A stopped variant is reported as partial.
 
-**B9. Coverage.** A variant that never reached its provider is reported as not run.
+**B9. Coverage.** A variant is reported as not run only when no call ever got a response from the billing service, or its key was refused before any call completed.
+A variant that got responses but no answers, such as one rejected request after another, is partial at 0% coverage, not "not run".
+A response whose body is not the documented shape is a failed call and is retried; it is never scored as the model's answer.
+A crash in one variant ends that variant as partial and does not lose the others' results.
 A variant that classified fewer than all 200 messages is reported with its coverage and left out of the head-to-head ranking.
 
 **B10. Report.** A local HTML report with: the head-to-head table (accuracy with a 95% confidence interval, invalid rate, cost per message, p50 and p95 latency) for complete variants; for each complete variant, a 95% paired confidence interval on its intent accuracy difference from the best variant, computed over the same messages; per-question accuracy; vendor-native tokens per message; partial and not-run variants listed separately with the reason; and the run date, dataset version, billing service, and the model identifiers and serving providers each response reported.
@@ -113,6 +120,8 @@ A variant whose cost is withheld is left out of every cost ranking in the public
 - **B6.** Given a variant that returned a label outside the allowed set for one question, when it is scored, then that answer is wrong, the message still counts as classified, and the invalid rate is above zero.
 - **B7.** Given a variant with one unknown-token call, when the report renders, then its cost is labeled as a lower bound and shows a count of 1.
 - **B8.** Given a cap set below the default, low enough to trigger on a test dataset, when that variant runs, then it stops before the estimated spend passes the cap and is reported as partial.
+- **B9.** Given a request rejected with HTTP 400 on the first message, when the run continues, then later messages are still sent and the variant is not marked not run.
+- **B8.** Given credits run out partway through, when the next call returns HTTP 402, then the variant stops at once and is reported as partial.
 - **B9.** Given an invalid key, when the run finishes, then each variant is listed as not run with the error, and none of them blocks or crashes another.
 - **B9.** Given a variant that classified 150 of 200 messages, when the report renders, then it shows 75% coverage and does not appear in the head-to-head ranking.
 
