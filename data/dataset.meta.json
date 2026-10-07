@@ -4,6 +4,6 @@
   "generator": "anthropic/claude-opus-5.5",
   "label_review": {
     "edited_labels": 46,
-    "summary": "Before freezing, 46 labels were edited: the edits were proposed with the help of Claude Opus 5.5 (Anthropic), after a second Claude Opus 5.5 session critiqued the label definitions, and each one was approved by the repository owner. No reviewer outside Anthropic's models has checked these labels yet. The change log is data/label-changes.md."
+    "summary": "Before freezing, 46 labels were edited: the edits were proposed with the help of Claude Opus 5.5 (Anthropic), after a second Claude Opus 5.5 session critiqued the label definitions, and each one was approved by the repository owner. Afterwards, Google's gemini-3.1-pro-preview relabeled the edited messages blind as an independent check (see Independent relabeling). The change log is data/label-changes.md."
   }
 }
