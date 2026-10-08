@@ -30,6 +30,14 @@ def load_env(path: Path = ROOT / ".env") -> None:
             os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
+def latest_run() -> Path:
+    """The newest saved run: results/ also holds labeling pages and relabel calls, which have no run.json."""
+    runs = sorted(p for p in RESULTS_DIR.glob("*/run.json")) if RESULTS_DIR.exists() else []
+    if not runs:
+        sys.exit("no saved run in results/; run one first, or pass a run directory")
+    return runs[-1].parent
+
+
 def write_reports(run_dir: Path) -> tuple[Path, Path]:
     meta, records = load_run(run_dir)
     dataset, version = ds.load_frozen()
@@ -142,6 +150,8 @@ def main(argv: list[str] | None = None) -> None:
     li.add_argument("--name", required=True, help="a handle for your labeling: lowercase letters, digits, hyphens")
     ls = sub.add_parser("label-second-look", help="write the local second-look page for your disagreements")
     ls.add_argument("--name", required=True)
+    lsum = sub.add_parser("label-summary", help="show a labeling's results from committed data; works from a fresh clone")
+    lsum.add_argument("--name", required=True)
     l2 = sub.add_parser("label-import-second", help="import a saved second-look file")
     l2.add_argument("file", type=Path)
     l2.add_argument("--name", required=True)
@@ -183,6 +193,16 @@ def main(argv: list[str] | None = None) -> None:
         print(f"labeled {len(record['labels'])} of {len(items)}, failed {len(record['failed'])}, cost ${record['cost_usd']:.4f}")
         print(f"served by {record['served_by']}, model {record['models_reported']}; wrote {relabel.RELABEL_FILE.relative_to(ROOT)}")
         return
+    if args.command == "label-summary":
+        dataset, _ = ds.load_frozen()
+        path = labeling.record_path(args.name)
+        if not path.exists():
+            sys.exit(f"no labeling named {args.name!r}; import one with label-import first")
+        record = json.loads(path.read_text())
+        sl = labeling.second_look_path(args.name)
+        record["second_look"] = json.loads(sl.read_text()) if sl.exists() else None
+        print(labeling.summary(record, dataset, relabel.edited_labels(), relabel.load()))
+        return
     if args.command in ("label-page", "label-import", "label-second-look", "label-import-second"):
         dataset, _ = ds.load_frozen()
         labeling.WORK_DIR.mkdir(parents=True, exist_ok=True)
@@ -215,7 +235,7 @@ def main(argv: list[str] | None = None) -> None:
             print(f"imported {len(out['answers'])} decisions into {path.relative_to(ROOT)}")
         return
     if args.command == "report":
-        run_dir = args.run_dir or max(RESULTS_DIR.iterdir(), key=lambda p: p.name)
+        run_dir = args.run_dir or latest_run()
         full, public = write_reports(run_dir)
         print(f"full edition (local only): {full.relative_to(ROOT)}\npublic edition: {public.relative_to(ROOT)}")
 

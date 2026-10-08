@@ -303,3 +303,40 @@ def edits_agreement(record: dict, dataset: list[dict], edits: dict) -> dict:
                 row["control_agree"] += matches(ans[q.name], truth[mid][q.name])
         out[q.name] = row
     return out
+
+
+def summary(record: dict, dataset: list[dict], edits: dict, rater: dict | None) -> str:
+    """Spec 007 B9: a labeling's results from committed data only, for anyone with a clone.
+    The ranking check is left out: it needs the run's raw call records, which stay local."""
+    from .relabel import agreement
+
+    truth = {m["id"]: m["truth"] for m in dataset}
+    n = len(record["labels"])
+    lines = [f"Labeling {record['labeler']!r}: {record['set']} set, {n} messages, had read: {EXPOSURE.get(record.get('exposure'), 'not recorded')}.", ""]
+    lines.append("Matches with the frozen label, per question:")
+    for q in QUESTIONS:
+        a = sum(matches(record["labels"][mid][q.name], truth[mid][q.name]) for mid in record["labels"])
+        lines.append(f"  {q.name:14} {a} of {n} ({100 * a / n:.1f}%)")
+    if record["set"] == "edits":
+        mine = edits_agreement(record, dataset, edits)
+        theirs = agreement(rater, dataset, edits) if rater else None
+        lines += ["", "Edited labels: frozen / generated / neither, with the control baseline (outside rater beside):"]
+        for q in QUESTIONS:
+            m = mine[q.name]
+            if not m["edited"]:
+                continue
+            r = theirs[q.name] if theirs else None
+            rt = f"   rater {r['frozen']} / {r['generated']} / {r['neither']}" if r else ""
+            lines.append(f"  {q.name:14} {m['frozen']} / {m['generated']} / {m['neither']} of {m['edited']}   controls {m['control_agree']} of {m['control']}{rt}")
+    sl = record.get("second_look")
+    if sl:
+        counts = second_look_counts(sl)
+        lines += ["", "Second look: kept mine / gave up / unsure:"]
+        for q in QUESTIONS:
+            c = counts[q.name]
+            lines.append(f"  {q.name:14} {c['keep mine']} / {c['keep frozen']} / {c['unsure']}")
+    else:
+        lines += ["", "No second look on record for this labeling."]
+    lines += ["", "Whether the ranking holds under these labels needs the run's raw call records, which are not in the",
+              "repository; it appears in the published report once this labeling is merged by pull request and the report is rebuilt."]
+    return "\n".join(lines)

@@ -1,11 +1,12 @@
-"""Runner, scoring and both report editions, driven through the real Claude SDK
-with hand-written HTTP responses (see conftest)."""
+"""Runner, scoring and both report editions, driven through the real OpenRouter
+client with hand-written HTTP responses (see conftest)."""
 
 import json
 import subprocess
 from pathlib import Path
 
 import httpx2
+import pytest
 
 from bakeoff.providers import ClaudeProvider
 from bakeoff.report import render
@@ -310,3 +311,19 @@ def test_question_version_tracks_the_prompt_template_and_decisions_layout(monkey
     original_req = providers.decisions_request
     monkeypatch.setattr(providers, "decisions_request", lambda t, qs: {**original_req(t, qs), "extra": 1})
     assert questions_version() != before  # Decisions request layout
+
+
+def test_b4_report_rebuilds_the_newest_saved_run_and_skips_other_results(tmp_path, monkeypatch):
+    from bakeoff import __main__ as cli
+
+    for name, has_run in [("20261007T100000Z-aaaaaa", True), ("20261007T200000Z-bbbbbb", True),
+                          ("labeling", False), ("relabel-20261007T230000Z", False)]:
+        (tmp_path / name).mkdir()
+        if has_run:
+            (tmp_path / name / "run.json").write_text("{}")
+    monkeypatch.setattr(cli, "RESULTS_DIR", tmp_path)
+    assert cli.latest_run().name == "20261007T200000Z-bbbbbb"
+
+    monkeypatch.setattr(cli, "RESULTS_DIR", tmp_path / "missing")
+    with pytest.raises(SystemExit, match="no saved run"):
+        cli.latest_run()
