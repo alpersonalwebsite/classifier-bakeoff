@@ -67,7 +67,7 @@ It applies no threshold; it shows what changed.
 - The outside model is `google/gemini-3.1-pro-preview` on `google-vertex/global`, as in spec 004, under the same Google terms the owner accepted.
 - The outside labeler may give two intents, so the "either intent" credit exists in both conditions. Without that, variants would lose it unequally: on the 11 two-intent messages Gemini labeled in spec 004, scoring against its single pick cost the variants between 1 and 4 messages each, which would look like a definitions effect.
 - Expected cost, estimated, not measured: drafting definitions about $0.05; labeling 200 messages about $0.80 at spec 004's measured $0.30 for 72; one full run about $0.90 at the 2026-10-07 run's measured $0.88. Each step keeps its own spend cap.
-- The current run, definitions, labels, ranking, and conclusions stay as published; the outside comparison is added beside them.
+- The current run, definitions, labels, ranking, and conclusions stay as published; the outside comparison is added beside them. (Spec 006 later replaced the published run and its conclusions with a run that defines intent.)
 
 ## Risks and open questions
 

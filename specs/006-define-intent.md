@@ -1,7 +1,7 @@
 # 006: Give intent a definition
 
 **Status**: Implemented
-**Amended**: 2026-10-07, B3: the earlier report is removed rather than kept, at the owner's request
+**Amended**: 2026-10-07, B3: the earlier report is removed rather than kept, at the owner's request; 2026-10-08, B4, success criteria, and risks to match
 **Created**: 2026-10-07
 
 ## Problem
@@ -56,16 +56,15 @@ The spec 005 outside run and labels used the outside definitions, which this cha
 ## Success criteria
 
 - Every question the models answer comes with its rule.
-- A reader can see, from the published report, how the ranking under a defined intent compares with the earlier run.
+- The published ranking comes from a run in which all four questions state their rule. (Amended: the first version also had the report compare it with the earlier run, which B3's removal took out.)
 
 ## Assumptions
 
 - The new intent text reads: "What does the sender of this message want? Not a lead means anything that is not a real estate inquiry, such as spam, a vendor pitch, or a wrong number. When the message clearly asks for two different things and neither is clearly the main one, either one is correct." It is the generator's rule in the question's voice; "anything that is not a real estate inquiry" makes explicit what its "such as" examples imply, so labels like m176 and m197 stay correct.
 - The run costs about $0.90 to $1.00, estimated from the 2026-10-07 run's measured $0.88 and a slightly longer intent text; not measured until the run.
-- The comparison with the earlier run sits in the new report, so the move from an undefined to a defined intent is visible in one place.
 
 ## Risks and open questions
 
 - **Still Claude-written.** The rule comes from the generator prompt drafted in a Claude session. It is the rule the labels follow, which is why it was chosen, but it is not an outside rule. Spec 005's outside definitions remain the comparison for that.
 - **The two-intent sentence tells models that either answer is correct.** That matches how they are scored. It could make a model hedge differently on single-intent messages; the per-question table will show any such change.
-- **Earlier checks age.** The relabeling and outside comparison were made under the earlier text. Rerunning them under the new text would cost about $2.40 and is not part of this spec.
+- **The relabeling ages.** The spec 004 relabeling was made under the earlier intent text; B4 shows how many of its labels that touches. Rerunning it with the outside labeling was estimated at about $2.40 and is not part of this spec. The spec 005 outside run is unaffected (B4).

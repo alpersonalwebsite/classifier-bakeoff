@@ -1,7 +1,7 @@
 # 001: Lead triage classifier bakeoff
 
 **Status**: Implemented
-**Amended by**: spec 003 (variant ranking, report order, paired reference)
+**Amended by**: spec 003 (variant ranking, report order, paired reference), spec 006 (intent definition)
 **Created**: 2026-10-07
 
 ## Problem
@@ -15,7 +15,7 @@ Without a head-to-head on the same messages, choosing one for production lead tr
 **In**:
 - A frozen synthetic dataset of lead messages with ground-truth answers.
 - One command that runs every variant over that dataset and writes one comparison report, in a full local edition and a publishable edition (B11).
-- Accuracy, invalid-answer rate, coverage, vendor-native tokens, cost, and latency per variant.
+- Accuracy, invalid-answer rate, coverage, tokens as the billing service reports them, cost, and latency per variant.
 - A spend cap per variant.
 
 **Out**:
@@ -39,7 +39,8 @@ Without a head-to-head on the same messages, choosing one for production lead tr
 Each question's text defines its terms, so a model never has to guess a reading only the dataset author knows:
 - timeline counts when the move or transaction (buy, sell, rent, move) happens, not when an answer or a valuation is needed, and is unknown when the message gives no time for it;
 - wants_contact is yes for a request for a reply addressed to the sender, by call, text, email, or a meeting, and a post or reply on a website, portal, web form, or chat widget does not count;
-- urgency is high only when the message names a deadline or forced move within five weeks, and a general wish for speed with no date is normal.
+- urgency is high only when the message names a deadline or forced move within five weeks, and a general wish for speed with no date is normal;
+- intent's not a lead covers anything that is not a real estate inquiry, and a message that clearly asks for two things with neither the main one accepts either (spec 006 B1).
 
 The question text in the code says exactly this, so the definitions the labels follow are the definitions every model is given.
 
@@ -98,7 +99,7 @@ A response whose body is not the documented shape is a failed call and is retrie
 A crash in one variant ends that variant as partial and does not lose the others' results.
 A variant that classified fewer than all 200 messages is reported with its coverage and left out of the head-to-head ranking.
 
-**B10. Report.** A local HTML report with: the head-to-head table (accuracy with a 95% confidence interval, invalid rate, cost per message, p50 and p95 latency) for complete variants; for each complete variant, a 95% paired confidence interval on its intent accuracy difference from the best variant, computed over the same messages; per-question accuracy; vendor-native tokens per message; partial and not-run variants listed separately with the reason; and the run date, dataset version, a version of the question text the models were given, billing service, and the model identifiers and serving providers each response reported.
+**B10. Report.** A local HTML report with: the head-to-head table (accuracy with a 95% confidence interval, invalid rate, cost per message, p50 and p95 latency) for complete variants; for each complete variant, a 95% paired confidence interval on its intent accuracy difference from the best variant, computed over the same messages; per-question accuracy; tokens per message as the billing service reports them; partial and not-run variants listed separately with the reason; and the run date, dataset version, a version of the question text the models were given, billing service, and the model identifiers and serving providers each response reported.
 
 **B11. Two editions.** Every report is produced in two editions from the same results.
 The full edition contains everything and is never committed.

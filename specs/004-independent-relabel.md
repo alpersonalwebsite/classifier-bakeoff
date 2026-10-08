@@ -48,7 +48,7 @@ It does not apply any threshold to call the review biased or not; it shows what 
 
 **B5. Disclosed in every report.** Every report built after the relabeling shows B3 and B4 in their own section, names the rater model and its vendor, and says it is one model's single pass, not a ground truth.
 The label-review disclosure from spec 003 adds that this independent check was made and by which model.
-Until a relabeling exists, the report says none has been made, as it does today.
+Until a relabeling exists, the report says none has been made.
 
 **B6. Replicable, as Google's terms require.** Everything needed to repeat the relabeling is published with its results: the rater model and endpoint, the exact request sent, its settings, how the blind set was chosen, and the dataset.
 
