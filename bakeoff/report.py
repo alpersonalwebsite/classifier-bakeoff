@@ -282,9 +282,17 @@ def render(
         if rec.get("failed"):
             parts.append(f'<p class="warn">{len(rec["failed"])} messages got no answer and are left out of everything below.</p>')
         if rec.get("questions_version") and rec["questions_version"] != meta.get("questions_version"):
+            # Say exactly which questions differ and how many checked labels that touches,
+            # rather than implying the whole check is stale.
+            given = rec.get("question_text") or {}
+            changed = [q.name for q in QUESTIONS if q.name in given and given[q.name] != q.text]
+            touched = sum(relabel["agreement"][q]["edited"] for q in changed)
+            detail = (f"Only the {', '.join(changed)} text differs from this run's, which affects {touched} of the "
+                      f"{relabel['edited_count']} edited labels it checked."
+                      if changed else "Which questions differ was not recorded.")
             parts.append(
                 f'<p class="warn">This relabeling was made under earlier question text (<code>{_e(rec["questions_version"])}</code>); '
-                f'this run used <code>{_e(meta.get("questions_version", "not recorded"))}</code>.</p>'
+                f'this run used <code>{_e(meta.get("questions_version", "not recorded"))}</code>. {_e(detail)}</p>'
             )
         rows = []
         for q in QUESTIONS:

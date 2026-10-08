@@ -37,7 +37,8 @@ Its wording is taken from the generator's description of intent, with one phrase
 That run's public report and its conclusions, approved by the owner before commit, become the published report, and the README and the Pages link point to it.
 The earlier report and its conclusions are removed from the repository, so only the run with intent defined is published. They remain in git history, and its Pages URL stops resolving. (Amended: the first version kept it with a superseded note.)
 
-**B4. Earlier checks stay readable.** The spec 004 relabeling and the spec 005 outside run were made under the earlier question text, and the new report says so wherever it shows them, since their raters and variants never saw the intent definition.
+**B4. Earlier checks stay readable.** The spec 004 relabeling was made under the earlier question text, so the new report says so where it shows it, naming the questions whose text differs and how many of its checked labels they touch.
+The spec 005 outside run and labels used the outside definitions, which this change does not touch, so they stay current; the report says what "current definitions" means there. (Amended 2026-10-08: the first version said both checks used the earlier text.)
 
 **B5. Disclosed.** The report says the intent definition, like the other three, comes from the Claude-assisted drafting, here the generator's rule.
 
@@ -49,7 +50,7 @@ The earlier report and its conclusions are removed from the repository, so only 
 - **B2.** Given the frozen dataset after this change, when its hash is checked, then it is still `sha256:8c43a059d800a559`.
 - **B3.** Given the new run, when its record is read, then its question-text version differs from `sha256:2db74e1065302281`, and the README and the published link name the new run.
 - **B3.** Given the repository after this change, when `reports/public/` and `reports/conclusions/` are listed, then only the run with intent defined is there.
-- **B4.** Given the new report, when it shows the spec 004 or spec 005 results, then it states they were made under the earlier question text.
+- **B4.** Given the new report, when it shows the spec 004 relabeling, then it names intent as the only question whose text differs and says it affects 1 of the 46 edited labels; and the spec 005 section does not call the outside run outdated.
 - **B5.** Given the new report, when it renders, then it names where the intent definition came from.
 
 ## Success criteria
