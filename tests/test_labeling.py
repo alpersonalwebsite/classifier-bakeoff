@@ -53,7 +53,8 @@ def test_b3_no_network_code_and_progress_saved(frozen):
 
 def test_b4_page_asks_what_was_read_and_import_requires_it(frozen):
     page = labeling.first_page(labeling.blind_set(frozen, "edits"), "edits")
-    assert _data(page)["askExposure"] is True and set(_data(page)["exposureOptions"]) == set(labeling.EXPOSURE)
+    assert _data(page)["askExposure"] is True and list(_data(page)["exposureOptions"]) == ["none", "report", "specs-or-code", "review"]
+    assert "pick the furthest you have gone" in page
     items = labeling.blind_set(frozen, "unseen")
     good = {"intent": ["buy"], "timeline": ["unknown"], "wants_contact": ["yes"], "urgency": ["normal"]}
     saved = {"set": "unseen", "exposure": "none", "answers": {i["blind_id"]: good for i in items}}

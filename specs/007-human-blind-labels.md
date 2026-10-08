@@ -40,7 +40,7 @@ Intent accepts one or two answers, as the frozen labels do; every other question
 The page works offline and makes no network request.
 
 **B4. Per labeler, kept apart.** Each labeling is saved under a name the labeler chooses, with its set, seed, and date, so several people's results sit side by side and none overwrites another.
-Before the first message, the page asks what the labeler had already read: nothing about the project, the published report, the specs or code, or the review itself. The answer is saved with the labeling, self-declared.
+Before the first message, the page asks what the labeler had already read, as one choice ordered from least to most: nothing about the project, the published report, the specs or code, or the review itself. A labeler to whom several apply picks the furthest they have gone. The answer is saved with the labeling, self-declared.
 A labeler who wants theirs in the published report commits it through a pull request.
 
 **B5. The comparison.** For each labeling on record and each question, the report shows how often the labeler's first-pass answer matches the frozen label.

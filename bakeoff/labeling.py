@@ -22,6 +22,7 @@ WORK_DIR = ROOT / "results" / "labeling"  # local only: the pages before anythin
 SETS = ("edits", "unseen")
 SEEDS = {"edits": 11, "unseen": 7}
 UNSEEN_SIZE = 60
+# Ordered from least to most exposure; a labeler picks the furthest they have gone (spec 007 B4).
 EXPOSURE = {
     "none": "Nothing about this project",
     "report": "The published report",
@@ -114,7 +115,7 @@ function esc(s){ const d = document.createElement("div"); d.textContent = s; ret
 function complete(it){ const a = state.answers[it.id] || {}; return DATA.fields(it).every(f => (a[f.name] || []).length > 0); }
 function render(){
   if (DATA.askExposure && !state.exposure) {
-    let h = `<p><b>Before you start:</b> what had you already read about this project? Answer honestly; it is saved with your labels and shown beside them.</p><fieldset><div class="opts">`;
+    let h = `<p><b>Before you start:</b> what had you already read about this project? If more than one applies, pick the furthest you have gone; the options run from least to most. Answer honestly; it is saved with your labels and shown beside them.</p><fieldset><div class="opts">`;
     for (const [k, v] of Object.entries(DATA.exposureOptions)) h += `<label><input type="radio" name="exposure" value="${k}"><span>${esc(v)}</span></label>`;
     app.innerHTML = h + `</div></fieldset><div class="nav"><button class="primary" id="go" disabled>Start</button></div>`;
     app.querySelectorAll('input[name="exposure"]').forEach(i => i.onchange = () => { document.getElementById("go").disabled = false; });
