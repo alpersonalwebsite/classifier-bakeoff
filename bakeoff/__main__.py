@@ -31,10 +31,14 @@ def load_env(path: Path = ROOT / ".env") -> None:
 
 
 def latest_run() -> Path:
-    """The newest saved run: results/ also holds labeling pages and relabel calls, which have no run.json."""
-    runs = sorted(p for p in RESULTS_DIR.glob("*/run.json")) if RESULTS_DIR.exists() else []
+    """The newest saved run under the current definitions. results/ also holds labeling pages and
+    relabel calls, which have no run.json, and runs under another definition set (spec 005), which
+    are compared in the current run's report and never scored against the frozen labels on their own.
+    Runs from before question sets were recorded carry none and were all under the current text."""
+    runs = sorted(RESULTS_DIR.glob("*/run.json")) if RESULTS_DIR.exists() else []
+    runs = [p for p in runs if json.loads(p.read_text()).get("question_set", "current") == "current"]
     if not runs:
-        sys.exit("no saved run in results/; run one first, or pass a run directory")
+        sys.exit("no saved run under the current definitions in results/; run one first, or pass a run directory")
     return runs[-1].parent
 
 

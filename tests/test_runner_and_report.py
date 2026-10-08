@@ -313,14 +313,16 @@ def test_question_version_tracks_the_prompt_template_and_decisions_layout(monkey
     assert questions_version() != before  # Decisions request layout
 
 
-def test_b4_report_rebuilds_the_newest_saved_run_and_skips_other_results(tmp_path, monkeypatch):
+def test_b4_report_rebuilds_the_newest_current_run_and_skips_other_results(tmp_path, monkeypatch):
     from bakeoff import __main__ as cli
 
-    for name, has_run in [("20261007T100000Z-aaaaaa", True), ("20261007T200000Z-bbbbbb", True),
-                          ("labeling", False), ("relabel-20261007T230000Z", False)]:
+    runs = [("20261007T100000Z-aaaaaa", {}), ("20261007T200000Z-bbbbbb", {"question_set": "current"}),
+            ("20261007T300000Z-cccccc", {"question_set": "outside-gemini"}),
+            ("labeling", None), ("relabel-20261007T230000Z", None)]
+    for name, meta in runs:
         (tmp_path / name).mkdir()
-        if has_run:
-            (tmp_path / name / "run.json").write_text("{}")
+        if meta is not None:
+            (tmp_path / name / "run.json").write_text(json.dumps(meta))
     monkeypatch.setattr(cli, "RESULTS_DIR", tmp_path)
     assert cli.latest_run().name == "20261007T200000Z-bbbbbb"
 

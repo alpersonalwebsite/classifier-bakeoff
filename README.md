@@ -31,7 +31,7 @@ Cost comes from the `usage.cost` OpenRouter returns with every call.
 uv run pytest                          # offline tests, no key needed
 uv run python -m bakeoff run --variant haiku-batched --limit 5   # smoke test, costs cents
 uv run python -m bakeoff run           # all six variants, then both reports
-uv run python -m bakeoff report        # rebuild reports from the newest run in results/, no API calls
+uv run python -m bakeoff report        # rebuild reports from the newest run under the current definitions, no API calls
 uv run python -m bakeoff report results/<run_id>   # or from a named one
 ```
 
