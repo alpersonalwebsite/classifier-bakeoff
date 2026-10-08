@@ -33,6 +33,26 @@ uv run python -m bakeoff report        # rebuild reports from the latest saved r
 uv run pytest
 ```
 
+## Check the labels yourself
+
+You can test the labels with your own reading, blind, in about 40 minutes, with no API key and no cost.
+**Label first, before reading the published report, the specs, the code, or anything under `data/`**: they all contain the labels or the definitions the models were given, and seeing them first defeats the check.
+
+```sh
+uv sync
+uv run python -m bakeoff label-page --set edits     # or --set unseen if you have followed the project's review
+# open the printed file in a browser, answer every message, then save your answers to a file
+uv run python -m bakeoff label-import ~/Downloads/labels-edits.json --name your-handle
+uv run python -m bakeoff label-second-look --name your-handle
+# open the printed file, mark each disagreement, save it
+uv run python -m bakeoff label-import-second ~/Downloads/second-look.json --name your-handle
+uv run python -m bakeoff report                     # your labeling appears in the full report
+```
+
+The page shows only the messages and plain questions, with no definitions and no labels, and asks once what you had already read; that answer is kept with your labels.
+The `edits` set has the 72 messages whose labels were edited in review (plus controls), so a fresh reader can test those edits directly.
+To have your labeling in the published report, open a pull request with your two files under `data/human/`; the handle you choose is published.
+
 ## What stays local
 
 | Path | Committed | Why |

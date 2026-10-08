@@ -6,8 +6,9 @@ import os
 import sys
 from pathlib import Path
 
-from . import conclusions, definitions, relabel
+from . import conclusions, definitions, labeling, relabel
 from . import dataset as ds
+from .questions import QUESTIONS
 from .report import load_withheld, render
 from .runner import RESULTS_DIR, run
 from .scoring import all_four_shares, load_run, score_run
@@ -80,9 +81,23 @@ def write_reports(run_dir: Path) -> tuple[Path, Path]:
                 "left_out": len(dataset) - len(labeled),
             },
         }
+    # Spec 007: every human blind labeling on record.
+    human_view = []
+    truth = {m["id"]: m["truth"] for m in dataset}
+    edits_all = relabel.edited_labels()
+    for rec in labeling.load_all():
+        agree = {q.name: sum(labeling.matches(rec["labels"][mid][q.name], truth[mid][q.name]) for mid in rec["labels"]) for q in QUESTIONS}
+        view = {"record": rec, "agree": agree, "n": len(rec["labels"]),
+                "ranked": [s for s in score_run(meta, records, labeling.with_labels(dataset, rec, edits_all)) if s.complete],
+                "second": labeling.second_look_counts(rec["second_look"]) if rec.get("second_look") else None}
+        if rec["set"] == "edits":
+            view["edits"] = labeling.edits_agreement(rec, dataset, edits_all)
+            rater = relabel.load()
+            view["rater"] = relabel.agreement(rater, dataset, edits_all) if rater else None
+        human_view.append(view)
     args = dict(
         meta=meta, scores=scores, withheld=withheld, dataset_meta=dataset_meta,
-        label_dependence=label_dependence, relabel=relabel_view, outside=outside_view,
+        label_dependence=label_dependence, relabel=relabel_view, outside=outside_view, human=human_view,
     )
     # Spec 002: conclusions belong to one run, and every figure they quote must be in
     # that run's public edition as it reads without them. Check before writing anything.
@@ -120,6 +135,16 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--limit", type=int, help="first N messages only, for a smoke test (reported as partial)")
     r.add_argument("--question-set", default="current", help="definition set under data/definitions/ (spec 005); default: current")
     sub.add_parser("relabel", help="blind outside-model relabeling of the edited messages (spec 004); costs money")
+    lp = sub.add_parser("label-page", help="write the local blind labeling page (spec 007); no key, no cost")
+    lp.add_argument("--set", choices=labeling.SETS, default="edits", help="edits: if you have not followed the review; unseen: if you have")
+    li = sub.add_parser("label-import", help="import a saved labels file under your chosen name")
+    li.add_argument("file", type=Path)
+    li.add_argument("--name", required=True, help="a handle for your labeling: lowercase letters, digits, hyphens")
+    ls = sub.add_parser("label-second-look", help="write the local second-look page for your disagreements")
+    ls.add_argument("--name", required=True)
+    l2 = sub.add_parser("label-import-second", help="import a saved second-look file")
+    l2.add_argument("file", type=Path)
+    l2.add_argument("--name", required=True)
     rep = sub.add_parser("report", help="rebuild both reports from a saved run, no provider calls")
     rep.add_argument("run_dir", nargs="?", type=Path, help="default: the latest run")
     args = parser.parse_args(argv)
@@ -157,6 +182,37 @@ def main(argv: list[str] | None = None) -> None:
         relabel.RELABEL_FILE.write_text(json.dumps(record, indent=2) + "\n")
         print(f"labeled {len(record['labels'])} of {len(items)}, failed {len(record['failed'])}, cost ${record['cost_usd']:.4f}")
         print(f"served by {record['served_by']}, model {record['models_reported']}; wrote {relabel.RELABEL_FILE.relative_to(ROOT)}")
+        return
+    if args.command in ("label-page", "label-import", "label-second-look", "label-import-second"):
+        dataset, _ = ds.load_frozen()
+        labeling.WORK_DIR.mkdir(parents=True, exist_ok=True)
+        labeling.HUMAN_DIR.mkdir(parents=True, exist_ok=True)
+        if args.command == "label-page":
+            items = labeling.blind_set(dataset, args.set)
+            page = labeling.WORK_DIR / f"labeling-{args.set}.html"
+            page.write_text(labeling.first_page(items, args.set), encoding="utf-8")
+            print(f"open {page} in a browser: {len(items)} messages ({args.set} set)")
+        elif args.command == "label-import":
+            path = labeling.record_path(args.name)
+            if path.exists():
+                sys.exit(f"{path.relative_to(ROOT)} already exists; choose another name")
+            record = labeling.import_first(dataset, json.loads(args.file.read_text()), args.name)
+            path.write_text(json.dumps(record, indent=2) + "\n")
+            print(f"imported {len(record['labels'])} messages ({record['set']} set) into {path.relative_to(ROOT)}")
+        elif args.command == "label-second-look":
+            record = json.loads(labeling.record_path(args.name).read_text())
+            items = labeling.blind_set(dataset, record["set"])
+            answers = {b: record["labels"][m] for b, m in record["blind_ids"].items()}
+            rows = labeling.disagreements(items, answers, dataset)
+            page = labeling.WORK_DIR / f"second-look-{args.name}.html"
+            page.write_text(labeling.second_page(rows), encoding="utf-8")
+            print(f"open {page} in a browser: {len(rows)} disagreements")
+        else:
+            saved = json.loads(args.file.read_text())
+            out = {"saved_at": saved.get("saved_at"), "answers": saved["answers"]}
+            path = labeling.second_look_path(args.name)
+            path.write_text(json.dumps(out, indent=2) + "\n")
+            print(f"imported {len(out['answers'])} decisions into {path.relative_to(ROOT)}")
         return
     if args.command == "report":
         run_dir = args.run_dir or max(RESULTS_DIR.iterdir(), key=lambda p: p.name)

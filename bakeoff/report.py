@@ -98,6 +98,7 @@ def render(
     label_dependence: dict[str, tuple[float, float]] | None = None,
     relabel: dict | None = None,
     outside: dict | None = None,
+    human: list | None = None,
 ) -> str:
     hidden_cost = {w["variant"] for w in withheld if w["figure"] == "cost"} if public else set()
     by_name = {s.name: s for s in scores}
@@ -402,6 +403,62 @@ def render(
         parts.append("<h3>The two definition sets</h3>")
         rows = [[_e(q.name), _e(q.text), _e(d["final"][q.name])] for q in QUESTIONS]
         parts.append('<div class="scroll defs">' + _table(["Question", "Current (Claude session)", "Outside (" + d["author_model"] + ")"], rows) + "</div>")
+
+    # Spec 007: human blind labelings, grouped by what each labeler had read.
+    from .labeling import EXPOSURE
+
+    parts.append("<h2>Human blind labels</h2>")
+    if not human:
+        parts.append(
+            "<p>No human blind labeling is on record. Anyone can run one from a clone of the repository, with no key and "
+            "no cost: see \"Check the labels yourself\" in the README.</p>"
+        )
+    else:
+        parts.append(
+            "<p>Each labeling is one person's single blind pass on a local page that showed only plain questions, with no "
+            "definitions and no labels. The page cannot stop a labeler from having read the labels or definitions elsewhere "
+            "(the report, the specs, the code), so each labeler declared what they had read, and labelings are grouped by "
+            "that.</p>"
+        )
+        for key, text in EXPOSURE.items():
+            group = [h for h in human if h["record"].get("exposure") == key]
+            if not group:
+                continue
+            parts.append(f"<h3>Had read: {_e(text.lower())}</h3>")
+            for h in group:
+                rec, n = h["record"], h["n"]
+                parts.append(f"<p><b>{_e(rec['labeler'])}</b>, {_e(rec['set'])} set, {n} messages, imported {_e(rec.get('imported_at', ''))}.</p>")
+                rows = []
+                for q in QUESTIONS:
+                    a = h["agree"][q.name]
+                    row = [_e(q.name), f"{a} of {n} ({_pct(a / n)})"]
+                    if h.get("edits"):
+                        e = h["edits"][q.name]
+                        base = f"{e['control_agree']} of {e['control']}" if e["control"] else "n/a"
+                        row += [f"{e['frozen']} / {e['generated']} / {e['neither']} of {e['edited']}" if e["edited"] else "none edited", base]
+                        r = (h.get("rater") or {}).get(q.name)
+                        row.append(f"{r['frozen']} / {r['generated']} / {r['neither']} of {r['edited']}" if r and r["edited"] else "n/a")
+                    if h.get("second"):
+                        c = h["second"][q.name]
+                        row.append(f"{c['keep mine']} / {c['keep frozen']} / {c['unsure']}")
+                    rows.append(row)
+                headers = ["Question", "Matches the frozen label"]
+                if h.get("edits"):
+                    headers += ["Edited labels: frozen / generated / neither", "Control agreement", "Outside rater, same"]
+                if h.get("second"):
+                    headers.append("Second look: kept mine / gave up / unsure")
+                parts.append('<div class="scroll">' + _table(headers, rows) + "</div>")
+                if not h.get("second"):
+                    parts.append("<p class='muted'>No second look at the disagreements is on record for this labeling.</p>")
+                alt = {s.name: s for s in h["ranked"]}
+                same = all(s.name in alt and (alt[s.name].rank, alt[s.name].tier) == (s.rank, s.tier) for s in complete)
+                top_now = {s.name for s in complete if s.rank == 1}
+                top_alt = {s.name for s in h["ranked"] if s.rank == 1}
+                verdict = ("Rank 1 and every rank and tier are the same under these labels." if same else
+                           ("Rank 1 is the same under these labels, but some ranks or tiers move." if top_now == top_alt
+                            else "Rank 1 changes under these labels."))
+                scope = "the edited labels" if rec["set"] == "edits" else f"its {n} messages"
+                parts.append(f"<p><b>{_e(verdict)}</b> The labeler's answers replace {scope}; every other label is as frozen.</p>")
 
     # Per-question accuracy, every variant that classified anything.
     rows = []
