@@ -110,6 +110,7 @@ def test_b3_a_failing_check_writes_no_edition(tmp_path, monkeypatch):
     monkeypatch.setattr(cli.ds, "LABEL_CHANGES_FILE", tmp_path / "no-label-log.md")
     monkeypatch.setattr(cli.relabel, "RELABEL_FILE", tmp_path / "no-relabel.json")
     monkeypatch.setattr(cli.definitions, "SET_FILE", tmp_path / "no-definitions.json")
+    monkeypatch.setattr(cli.labeling, "HUMAN_DIR", tmp_path / "no-human")
     monkeypatch.setattr(cli, "FULL_DIR", tmp_path / "full")
     monkeypatch.setattr(cli, "PUBLIC_DIR", tmp_path / "public")
     (tmp_path / "concl").mkdir()
