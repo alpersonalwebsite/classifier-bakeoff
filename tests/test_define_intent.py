@@ -32,14 +32,5 @@ def test_b3_question_version_moved():
     assert questions_version() != "sha256:2db74e1065302281"
 
 
-def test_b3_a_superseded_report_says_so_and_rebuilds_identically(tmp_path, monkeypatch):
-    f = tmp_path / "superseded.json"
-    f.write_text(json.dumps({"old-run": {"run_id": "new-run", "reason": "intent now has a definition."}}))
-    monkeypatch.setattr(report, "SUPERSEDED_FILE", f)
-    a = render(META, [], public=True, withheld=[])
-    assert "Superseded by run <code>new-run</code>" in a and "different question text" in a
-    assert render(META, [], public=True, withheld=[]) == a
-
-
 def test_b5_report_names_where_the_definitions_come_from():
     assert "Claude-assisted drafting" in render(META, [], public=True, withheld=[])

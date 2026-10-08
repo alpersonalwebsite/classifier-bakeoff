@@ -146,15 +146,18 @@ def test_b3_a_figure_must_match_a_whole_printed_figure_not_part_of_one(tmp_path)
 
 
 def test_reviewers_cases_against_the_published_report():
-    """The three cases from the PR #5 review, on the real committed report."""
+    """Whole-figure matching on the real committed report: a figure's tail or a truncated
+    figure never counts as printed (review of PR #5)."""
     from pathlib import Path
 
-    pub = (Path(__file__).resolve().parent.parent / "reports/public/20261007T194642Z-ba611a.html").read_text()
+    pub = (Path(__file__).resolve().parent.parent / "reports/public/20261007T235443Z-da1571.html").read_text()
     start = pub.index("<h2>Conclusions</h2>")
     without = pub[:start] + pub[pub.index("<h2>", start + 5):]
-    for wrong in ("Jev trails by 4.0% on intent.", "Haiku reaches 5.5% on intent.", "Decisions costs $0.00006 per message."):
+    shown = conclusions.page_text(without)
+    assert "94.0%" in shown and "98.0%" in shown and "$0.000067" in shown
+    for wrong in ("Haiku trails by 4.0% on intent.", "Decisions reaches 8.0% on intent.", "Decisions costs $0.00006 per message."):
         assert conclusions.check(wrong, without), wrong
-    assert conclusions.check("Decisions is 94.0% on intent at $0.000062.", without) == []
+    assert conclusions.check("Decisions is 98.0% on intent at $0.000067.", without) == []
 
 
 def test_b4_numbered_lists_render_as_ordered_lists():
