@@ -20,7 +20,11 @@ class Question:
 QUESTIONS: tuple[Question, ...] = (
     Question(
         name="intent",
-        text="What does the sender of this message want?",
+        text=(
+            "What does the sender of this message want? "
+            "Not a lead means anything that is not a real estate inquiry, such as spam, a vendor pitch, or a wrong number. "
+            "When the message clearly asks for two different things and neither is clearly the main one, either one is correct."
+        ),
         labels=("buy", "sell", "rent", "valuation", "general question", "not a lead"),
     ),
     Question(

@@ -9,6 +9,12 @@ from .scoring import VariantScore
 
 ROOT = Path(__file__).resolve().parent.parent
 WITHHELD_FILE = ROOT / "withheld.json"
+# Spec 006 B3: which published run supersedes which, so an older report says so on rebuild.
+SUPERSEDED_FILE = ROOT / "reports" / "superseded.json"
+DEFINITIONS_NOTE = (
+    "All four definitions the variants were given, including intent's (taken from the rule the dataset was "
+    "generated under), come from the Claude-assisted drafting."
+)
 
 
 # The only figure the public edition knows how to remove. Listing any other figure would
@@ -137,7 +143,15 @@ def render(
         )
     if not public:
         parts.append('<p class="warn">Full edition: never commit this file (constitution Principle 6).</p>')
+    superseded = json.loads(SUPERSEDED_FILE.read_text()) if SUPERSEDED_FILE.exists() else {}
+    if meta["run_id"] in superseded:
+        newer = superseded[meta["run_id"]]
+        parts.append(
+            f'<p class="warn">Superseded by run <code>{_e(newer["run_id"])}</code>: {_e(newer["reason"])} '
+            "This report is kept for comparison.</p>"
+        )
     parts.append(dataset_note(dataset_meta, meta.get("models", {})))
+    parts.append(f"<p class='muted'>{_e(DEFINITIONS_NOTE)}</p>")
 
     # Spec 003 B3: rank 1 and the rule, before any table.
     parts.append("<h2>Ranking</h2>")
@@ -276,6 +290,11 @@ def render(
         )
         if rec.get("failed"):
             parts.append(f'<p class="warn">{len(rec["failed"])} messages got no answer and are left out of everything below.</p>')
+        if rec.get("questions_version") and rec["questions_version"] != meta.get("questions_version"):
+            parts.append(
+                f'<p class="warn">This relabeling was made under earlier question text (<code>{_e(rec["questions_version"])}</code>); '
+                f'this run used <code>{_e(meta.get("questions_version", "not recorded"))}</code>.</p>'
+            )
         rows = []
         for q in QUESTIONS:
             a = relabel["agreement"][q.name]
@@ -316,6 +335,10 @@ def render(
             f"current definitions or any message, and approved by the repository owner ({_e(d.get('approval_note', 'as written'))}). "
             "The same model then labeled all 200 messages blind under them. It is one model's single pass, not ground truth, "
             "and the question names and label words, shared by both versions, remain untested.</p>"
+        )
+        parts.append(
+            f"<p class='muted'>\"Current definitions\" below means the ones this run used (<code>{_e(meta.get('questions_version', ''))}</code>); "
+            "the outside run and labels were made under the outside definitions and do not depend on them.</p>"
         )
         cols = [("current definitions, current labels", {s.name: s for s in complete}),
                 ("current definitions, outside labels", {s.name: s for s in outside["mid"]})]
