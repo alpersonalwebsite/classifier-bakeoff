@@ -287,8 +287,10 @@ def render(
             given = rec.get("question_text") or {}
             changed = [q.name for q in QUESTIONS if q.name in given and given[q.name] != q.text]
             touched = sum(relabel["agreement"][q]["edited"] for q in changed)
+            baselines = [q for q in changed if relabel["agreement"][q]["control"]]
             detail = (f"Only the {', '.join(changed)} text differs from this run's, which affects {touched} of the "
-                      f"{relabel['edited_count']} edited labels it checked."
+                      f"{relabel['edited_count']} edited labels it checked"
+                      + (f" and the {', '.join(baselines)} row's control baseline." if baselines else ".")
                       if changed else "Which questions differ was not recorded.")
             parts.append(
                 f'<p class="warn">This relabeling was made under earlier question text (<code>{_e(rec["questions_version"])}</code>); '

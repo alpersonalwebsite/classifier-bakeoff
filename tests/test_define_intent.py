@@ -40,4 +40,5 @@ def test_b4_report_names_which_question_changed_for_the_relabeling():
     from pathlib import Path
 
     page = (Path(__file__).resolve().parent.parent / "reports/public/20261007T235443Z-da1571.html").read_text()
-    assert "Only the intent text differs from this run&#x27;s, which affects 1 of the 46 edited labels it checked." in page
+    assert ("Only the intent text differs from this run&#x27;s, which affects 1 of the 46 edited labels it checked "
+            "and the intent row&#x27;s control baseline.") in page
