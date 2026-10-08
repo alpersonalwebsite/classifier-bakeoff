@@ -9,8 +9,6 @@ from .scoring import VariantScore
 
 ROOT = Path(__file__).resolve().parent.parent
 WITHHELD_FILE = ROOT / "withheld.json"
-# Spec 006 B3: which published run supersedes which, so an older report says so on rebuild.
-SUPERSEDED_FILE = ROOT / "reports" / "superseded.json"
 DEFINITIONS_NOTE = (
     "All four definitions the variants were given, including intent's (taken from the rule the dataset was "
     "generated under), come from the Claude-assisted drafting."
@@ -143,13 +141,6 @@ def render(
         )
     if not public:
         parts.append('<p class="warn">Full edition: never commit this file (constitution Principle 6).</p>')
-    superseded = json.loads(SUPERSEDED_FILE.read_text()) if SUPERSEDED_FILE.exists() else {}
-    if meta["run_id"] in superseded:
-        newer = superseded[meta["run_id"]]
-        parts.append(
-            f'<p class="warn">Superseded by run <code>{_e(newer["run_id"])}</code>: {_e(newer["reason"])} '
-            "This report is kept for comparison.</p>"
-        )
     parts.append(dataset_note(dataset_meta, meta.get("models", {})))
     parts.append(f"<p class='muted'>{_e(DEFINITIONS_NOTE)}</p>")
 

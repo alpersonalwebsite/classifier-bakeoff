@@ -10,7 +10,6 @@ The rules every run follows are in [`constitution.md`](constitution.md), and the
 
 The latest public report is at https://alpersonalwebsite.github.io/classifier-bakeoff/reports/public/20261007T235443Z-da1571.html, from a run on 2026-10-07 over the frozen dataset with question text `sha256:6cbd46e11dc7a47c`.
 Its source is [`reports/public/20261007T235443Z-da1571.html`](reports/public/20261007T235443Z-da1571.html), and its conclusions are in [`reports/conclusions/20261007T235443Z-da1571.md`](reports/conclusions/20261007T235443Z-da1571.md).
-The earlier report, from before intent had a definition, is kept for comparison and says it is superseded.
 
 ## Setup
 

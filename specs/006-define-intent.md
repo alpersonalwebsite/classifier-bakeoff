@@ -1,6 +1,7 @@
 # 006: Give intent a definition
 
 **Status**: Implemented
+**Amended**: 2026-10-07, B3: the earlier report is removed rather than kept, at the owner's request
 **Created**: 2026-10-07
 
 ## Problem
@@ -34,8 +35,7 @@ Its wording is taken from the generator's description of intent, with one phrase
 
 **B3. A new run is the published one.** All six variants run with the new question text, which changes the question-text version.
 That run's public report and its conclusions, approved by the owner before commit, become the published report, and the README and the Pages link point to it.
-The 2026-10-07 report stays in the repository and is rebuilt from its saved results with a note naming the run that supersedes it; the rebuild also carries the existing warning that its question text differs from the current code, which is accurate.
-The superseded note comes from a committed record, not a hand edit, so the rebuilt report stays reproducible (spec 002).
+The earlier report and its conclusions are removed from the repository, so only the run with intent defined is published. They remain in git history, and its Pages URL stops resolving. (Amended: the first version kept it with a superseded note.)
 
 **B4. Earlier checks stay readable.** The spec 004 relabeling and the spec 005 outside run were made under the earlier question text, and the new report says so wherever it shows them, since their raters and variants never saw the intent definition.
 
@@ -48,7 +48,7 @@ The superseded note comes from a committed record, not a hand edit, so the rebui
 - **B1.** Given any two variants' requests in the new run, when their intent text is compared, then it matches word for word.
 - **B2.** Given the frozen dataset after this change, when its hash is checked, then it is still `sha256:8c43a059d800a559`.
 - **B3.** Given the new run, when its record is read, then its question-text version differs from `sha256:2db74e1065302281`, and the README and the published link name the new run.
-- **B3.** Given the 2026-10-07 public report rebuilt from its saved results, when it is read, then it names the run that supersedes it and carries the question-text warning, and rebuilding it again reproduces it byte for byte.
+- **B3.** Given the repository after this change, when `reports/public/` and `reports/conclusions/` are listed, then only the run with intent defined is there.
 - **B4.** Given the new report, when it shows the spec 004 or spec 005 results, then it states they were made under the earlier question text.
 - **B5.** Given the new report, when it renders, then it names where the intent definition came from.
 
