@@ -1,8 +1,8 @@
 """Capture each HTTP exchange exactly as sent and received (spec 001 B5).
 
-All three SDKs accept an `httpx2.Client`, so one transport wrapper records the
-request body and the raw response body for every provider. Token counts are
-read from that raw body, never from an SDK convenience field or a local
+Every call goes through one OpenRouter client built on an `httpx2.Client`, so
+one transport wrapper records the request body and the raw response body for
+every variant. Token counts are read from that raw body, never from a local
 estimate (constitution Principle 2).
 """
 
@@ -13,7 +13,7 @@ from typing import Any
 
 import httpx2
 
-# Headers that carry credentials for any of the three vendors.
+# Headers that can carry credentials, OpenRouter's or any vendor's.
 _SECRET_HEADERS = {"authorization", "x-api-key", "api-key", "openai-organization", "openai-project"}
 
 

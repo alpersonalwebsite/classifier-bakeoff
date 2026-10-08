@@ -5,7 +5,7 @@ request shape. Claude goes through OpenRouter's chat completions. Each request
 is pinned to the model's own vendor with no fallback, so a variant's answers
 always come from the model it names.
 
-There are no SDK retries here: the runner retries, so every attempt is
+There are no client-level retries here: the runner retries, so every attempt is
 recorded (B5) and every variant gets the same retry rule.
 """
 
