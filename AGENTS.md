@@ -7,7 +7,7 @@ The repository is public.
 ## Rules that come first
 
 - `constitution.md` (v2.0.0) holds six principles every change must follow; read it before changing behavior.
-- Work is spec driven: `specs/001-lead-triage-bakeoff.md` defines behavior and acceptance checks. A change to scope or behavior updates the spec in the same change, and new work starts with a new spec (`specs/002-…`).
+- Work is spec driven: `specs/` defines behavior and acceptance checks, starting with `specs/001-lead-triage-bakeoff.md`, amended or extended by 002 to 007. A change to scope or behavior updates the spec in the same change, and new work starts with a new numbered spec (next: `specs/008-…`).
 - Nothing tied to an employer or client goes in the repo, and the data stays fictional (555-0100 to 555-0199 phone numbers, `example.com` emails).
 - Never commit `results/`, `reports/full/`, `data/candidate*.jsonl`, `prices.local.json`, or `.env`; `.gitignore` covers them.
 - Result numbers appear only in the public report edition (`reports/public/`) and the written conclusions that feed it (`reports/conclusions/`), never in commit messages, PR descriptions, or comments.
@@ -23,7 +23,7 @@ The repository is public.
 - `data/dataset.jsonl`: the frozen 200-message dataset; never edit it, since a run refuses a dataset whose hash changed. `data/label-changes.md` logs the review edits made before freezing, and reports rebuild the pre-review labels from it; `data/dataset.meta.json` records who made and reviewed the data, which reports print.
 - `bakeoff/relabel.py` and `data/relabel/`: the blind relabeling of the edited messages by a model whose vendor has no variant (spec 004), and its committed record, which reports compare against.
 - `data/definitions/`: alternative, owner-approved definition sets (spec 005); `questions.load_set()` refuses an unapproved one. Names and labels never change between sets, only the question text, which changes `questions_version`.
-- `bakeoff/labeling.py` and `data/human/`: blind human labeling anyone can run (spec 007), one record per labeler, with the exclusion list for the unseen set. Never show a labeler a label or definition on the page.
+- `bakeoff/labeling.py` and `data/human/`: blind human labeling anyone can run (spec 007), one record per labeler, with the exclusion list for the unseen set. Never show a labeler a label or definition on the page. `label-summary` shows a labeler's results from committed data alone; the ranking under their labels needs a saved run, so it only appears in a rebuilt report.
 - `withheld.json`: figures the public edition removes (only `cost` is supported); currently empty.
 - `prices.json`: fallback rates only; cost comes from OpenRouter's `usage.cost`.
 
@@ -31,13 +31,15 @@ The repository is public.
 
 ```sh
 uv sync
-uv run pytest                                   # 99 offline tests, no keys needed
+uv run pytest                                   # 101 offline tests, no keys needed
 uv run python -m bakeoff run --variant haiku-batched --limit 5   # smoke test, costs cents
 uv run python -m bakeoff run                    # full run, under $1; ask before running
-uv run python -m bakeoff report                 # rebuild reports from the latest saved run, no API calls
+uv run python -m bakeoff report [results/<run_id>]   # rebuild reports from the newest saved run (or the one named), no API calls
 uv run python -m bakeoff relabel                # blind outside-model relabeling (spec 004), under $1; ask before running
 uv run python -m bakeoff run --question-set outside-gemini   # full run under the outside definitions (spec 005); ask before running
 ```
+
+Human labeling (spec 007), no key and no cost: `label-page --set edits|unseen`, `label-import FILE --name H`, `label-second-look --name H`, `label-import-second FILE --name H`, `label-summary --name H`. The README's "Check the labels yourself" section is the walkthrough.
 
 A full run, generation, or any call that spends money needs the owner's go-ahead first.
 `OPENROUTER_API_KEY` is read from `.env` (copy `.env.example`).
@@ -46,7 +48,7 @@ A full run, generation, or any call that spends money needs the owner's go-ahead
 
 Any change to question text, labels, the Claude prompt template, or the Decisions request layout changes `questions_version()`.
 Earlier runs then no longer match the code, and their reports show a warning, so a fresh run is needed before publishing.
-The question text and the spec's B1 definitions must say the same thing.
+The question text and spec 001 B1's definitions (intent's from spec 006 B1) must say the same thing.
 
 ## Tests
 
