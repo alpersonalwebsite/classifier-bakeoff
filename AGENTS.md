@@ -30,7 +30,7 @@ The repository is public.
 
 ```sh
 uv sync
-uv run pytest                                   # 85 offline tests, no keys needed
+uv run pytest                                   # 86 offline tests, no keys needed
 uv run python -m bakeoff run --variant haiku-batched --limit 5   # smoke test, costs cents
 uv run python -m bakeoff run                    # full run, under $1; ask before running
 uv run python -m bakeoff report                 # rebuild reports from the latest saved run, no API calls

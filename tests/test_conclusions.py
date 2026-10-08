@@ -158,3 +158,8 @@ def test_reviewers_cases_against_the_published_report():
     for wrong in ("Haiku trails by 4.0% on intent.", "Decisions reaches 8.0% on intent.", "Decisions costs $0.00006 per message."):
         assert conclusions.check(wrong, without), wrong
     assert conclusions.check("Decisions is 98.0% on intent at $0.000067.", without) == []
+
+
+def test_b4_numbered_lists_render_as_ordered_lists():
+    out = conclusions.to_html("1. first <b>\n2. second")
+    assert out == "<ol><li>first &lt;b&gt;</li><li>second</li></ol>"
