@@ -36,6 +36,7 @@ The result is a second label set kept beside the frozen dataset, which does not 
 
 **B3. A run under the outside definitions.** All six variants run over the frozen messages with the outside definitions as their question text, through the same harness and under the same rules as every run.
 That run records its own question-text version, different from the current one, and is scored against the outside labels.
+It writes no report of its own, since a report scores against the frozen labels; it appears in the current run's report (B4). (Amended 2026-10-08.)
 
 **B4. Does the ranking depend on the definitions?** Two things change between the current setup and the outside one, the definitions the variants answer under and the labels they are scored against, so the report separates them with three rankings:
 the current run scored against the current labels (today's report); the current run scored against the outside labels, which needs no new calls and shows the effect of the labels alone; and the outside run scored against the outside labels, which, compared with the middle one, shows the effect of the definitions alone.

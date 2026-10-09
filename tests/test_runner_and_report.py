@@ -329,3 +329,21 @@ def test_b4_report_rebuilds_the_newest_current_run_and_skips_other_results(tmp_p
     monkeypatch.setattr(cli, "RESULTS_DIR", tmp_path / "missing")
     with pytest.raises(SystemExit, match="no saved run"):
         cli.latest_run()
+
+
+def test_spec005_b3_a_run_under_another_definition_set_writes_no_report_of_its_own(tmp_path, monkeypatch, capsys):
+    from bakeoff import __main__ as cli
+
+    monkeypatch.setattr(cli, "load_env", lambda: None)
+    monkeypatch.setattr(cli, "load_prices", lambda: {})
+    monkeypatch.setattr(cli.ds, "load_frozen", lambda: ([], "sha256:x"))
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setattr(cli, "run", lambda *a, **k: tmp_path / "20261008T000000Z-dddddd")
+
+    def no_report(run_dir):
+        raise AssertionError("a report was written for an outside-definitions run")
+
+    monkeypatch.setattr(cli, "write_reports", no_report)
+    cli.main(["run", "--question-set", "outside-gemini"])
+    out = capsys.readouterr().out
+    assert "reports skipped" in out and "20261008T000000Z-dddddd" in out

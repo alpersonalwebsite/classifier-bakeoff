@@ -31,12 +31,12 @@ The repository is public.
 
 ```sh
 uv sync
-uv run pytest                                   # 101 offline tests, no keys needed
+uv run pytest                                   # 102 offline tests, no keys needed
 uv run python -m bakeoff run --variant haiku-batched --limit 5   # smoke test, costs cents
 uv run python -m bakeoff run                    # full run, under $1; ask before running
 uv run python -m bakeoff report [results/<run_id>]   # rebuild reports from the newest run under the current definitions (or the one named), no API calls
 uv run python -m bakeoff relabel                # blind outside-model relabeling (spec 004), under $1; ask before running
-uv run python -m bakeoff run --question-set outside-gemini   # full run under the outside definitions (spec 005); ask before running
+uv run python -m bakeoff run --question-set outside-gemini   # full run under the outside definitions (spec 005), no report of its own; ask before running
 ```
 
 Human labeling (spec 007), no key and no cost: `label-page --set edits|unseen`, `label-import FILE --name H`, `label-second-look --name H`, `label-import-second FILE --name H`, `label-summary --name H`. The README's "Check the labels yourself" section is the walkthrough.

@@ -186,6 +186,12 @@ def main(argv: list[str] | None = None) -> None:
         if args.limit:
             print("smoke test: reports skipped, since they score against the full dataset")
             return
+        if args.question_set != "current":
+            # Spec 005 B3: scored against the frozen labels on its own, this run would mix the
+            # outside definitions with the current labels. The current run's report compares it.
+            print(f"reports skipped: a {args.question_set} run is compared in the current run's report. To use this run there,")
+            print(f"set run_id in data/definitions/{args.question_set}.json to {run_dir.name}, then run `report`.")
+            return
         args.command, args.run_dir = "report", run_dir
     if args.command == "relabel":
         load_env()
