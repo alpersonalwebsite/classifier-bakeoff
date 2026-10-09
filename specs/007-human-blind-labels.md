@@ -1,6 +1,6 @@
 # 007: Blind human labeling, for anyone who clones the repository
 
-**Status**: Agreed (amended 2026-10-08, see the end)
+**Status**: Implemented (amended 2026-10-08, see the end)
 **Created**: 2026-10-08
 
 ## Problem
@@ -20,6 +20,7 @@ A reader who clones the repository and has not followed the review is the best o
 - A second look at each labeler's disagreements, with the definitions shown, in which they mark each as keep mine, keep frozen, or unsure.
 - The ranking recomputed with each labeler's answers.
 - Every labeling on record shown in the report, side by side, and instructions in the README.
+- A labeler seeing their own results from a clone, before anything is merged.
 
 **Out**:
 - Changing the frozen labels. Human labels sit beside them.
@@ -56,6 +57,9 @@ The report states plainly whether rank 1 and the tiers are the same.
 **B8. Disclosed.** The report names each labeling's set, labeler name, and what the labeler declared having read, calls it one person's single blind pass made without the definitions on the page, and groups labelings by that declaration, so ones made after reading the report or definitions are not mixed with ones made fresh.
 With no labeling on record, the report says so and points to the README section that explains how to run one.
 
+**B9. Results from a clone.** A labeler can see their own B5 and B6 results from a fresh clone, from committed data only, with no key and no saved run.
+The B7 ranking needs a run's raw responses, which are not committed, so it is not shown there; the labeler is told it appears in the published report once their labeling is added through a pull request.
+
 ## Acceptance
 
 - **B1.** Given the edits set, when it is built, then it holds the same 72 messages as spec 004's blind set, in a different order; given the unseen set, then it holds 60 messages, none of them excluded, the same 60 every time.
@@ -70,10 +74,11 @@ With no labeling on record, the report says so and points to the README section 
 - **B6.** Given a second look on record, when the report renders, then it shows per question how many disagreements were kept, given up, or marked unsure, and the first-pass answers are unchanged.
 - **B7.** Given a labeling on the edits set, when the ranking is recomputed, then only the edited labels change; on the unseen set, only its 60 messages change.
 - **B8.** Given no labeling on record, when the report renders, then it says none is on record and points to the README.
+- **B9.** Given a fresh clone with an imported labeling and no saved run, when the labeler asks for their results, then they see the B5 figures, the B6 counts or that no second look is on record, and a statement that the ranking appears only in the published report.
 
 ## Success criteria
 
-- Someone who clones the repository can run a labeling from the README alone, with no key, in one sitting of under 45 minutes, and a second look in under 15.
+- Someone who clones the repository can run a labeling and see its results from the README alone, with no key, in one sitting of under 45 minutes, and a second look in under 15.
 - Each labeling on record shows, per question, where its labeler and the labels agree, where the labeler keeps a different reading after seeing the definition, and whether the ranking survives.
 
 ## Assumptions
@@ -92,3 +97,5 @@ With no labeling on record, the report says so and points to the README section 
 ## Amendment
 
 2026-10-08: the first agreed version had the owner label the unseen set. The owner chose not to label, and asked that anyone cloning the repository be able to run and verify it instead. The scope became a tool for any labeler, with two message sets, per-labeler records, and README instructions; the unseen set and its exclusion list are kept for readers who have followed the review.
+
+2026-10-08: B9 added. The README's last step rebuilt the report, which needs a saved run a clone does not have, so a labeler had no way to see their own results.

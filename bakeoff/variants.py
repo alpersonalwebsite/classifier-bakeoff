@@ -6,8 +6,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PRICES_FILE = ROOT / "prices.json"
-# Jev's rate stays out of committed files while its disclosure question is
-# open (spec 001 Risks, constitution Principle 6).
+# Optional local fallback rates, gitignored. Jev has no committed fallback rate;
+# its cost comes from usage.cost like every variant's (spec 001 Risks).
 LOCAL_PRICES_FILE = ROOT / "prices.local.json"
 
 DEFAULT_CAP_USD = 2.0

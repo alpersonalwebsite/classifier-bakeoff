@@ -30,6 +30,18 @@ def load_env(path: Path = ROOT / ".env") -> None:
             os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
+def latest_run() -> Path:
+    """The newest saved run under the current definitions. results/ also holds labeling pages and
+    relabel calls, which have no run.json, and runs under another definition set (spec 005), which
+    are compared in the current run's report and never scored against the frozen labels on their own.
+    Runs from before question sets were recorded carry none and were all under the current text."""
+    runs = sorted(RESULTS_DIR.glob("*/run.json")) if RESULTS_DIR.exists() else []
+    runs = [p for p in runs if json.loads(p.read_text()).get("question_set", "current") == "current"]
+    if not runs:
+        sys.exit("no saved run under the current definitions in results/; run one first, or pass a run directory")
+    return runs[-1].parent
+
+
 def write_reports(run_dir: Path) -> tuple[Path, Path]:
     meta, records = load_run(run_dir)
     dataset, version = ds.load_frozen()
@@ -142,6 +154,8 @@ def main(argv: list[str] | None = None) -> None:
     li.add_argument("--name", required=True, help="a handle for your labeling: lowercase letters, digits, hyphens")
     ls = sub.add_parser("label-second-look", help="write the local second-look page for your disagreements")
     ls.add_argument("--name", required=True)
+    lsum = sub.add_parser("label-summary", help="show a labeling's results from committed data; works from a fresh clone")
+    lsum.add_argument("--name", required=True)
     l2 = sub.add_parser("label-import-second", help="import a saved second-look file")
     l2.add_argument("file", type=Path)
     l2.add_argument("--name", required=True)
@@ -172,6 +186,12 @@ def main(argv: list[str] | None = None) -> None:
         if args.limit:
             print("smoke test: reports skipped, since they score against the full dataset")
             return
+        if args.question_set != "current":
+            # Spec 005 B3: scored against the frozen labels on its own, this run would mix the
+            # outside definitions with the current labels. The current run's report compares it.
+            print(f"reports skipped: a {args.question_set} run is compared in the current run's report. To use this run there,")
+            print(f"set run_id in data/definitions/{args.question_set}.json to {run_dir.name}, then run `report`.")
+            return
         args.command, args.run_dir = "report", run_dir
     if args.command == "relabel":
         load_env()
@@ -182,6 +202,16 @@ def main(argv: list[str] | None = None) -> None:
         relabel.RELABEL_FILE.write_text(json.dumps(record, indent=2) + "\n")
         print(f"labeled {len(record['labels'])} of {len(items)}, failed {len(record['failed'])}, cost ${record['cost_usd']:.4f}")
         print(f"served by {record['served_by']}, model {record['models_reported']}; wrote {relabel.RELABEL_FILE.relative_to(ROOT)}")
+        return
+    if args.command == "label-summary":
+        dataset, _ = ds.load_frozen()
+        path = labeling.record_path(args.name)
+        if not path.exists():
+            sys.exit(f"no labeling named {args.name!r}; import one with label-import first")
+        record = json.loads(path.read_text())
+        sl = labeling.second_look_path(args.name)
+        record["second_look"] = json.loads(sl.read_text()) if sl.exists() else None
+        print(labeling.summary(record, dataset, relabel.edited_labels(), relabel.load()))
         return
     if args.command in ("label-page", "label-import", "label-second-look", "label-import-second"):
         dataset, _ = ds.load_frozen()
@@ -215,7 +245,7 @@ def main(argv: list[str] | None = None) -> None:
             print(f"imported {len(out['answers'])} decisions into {path.relative_to(ROOT)}")
         return
     if args.command == "report":
-        run_dir = args.run_dir or max(RESULTS_DIR.iterdir(), key=lambda p: p.name)
+        run_dir = args.run_dir or latest_run()
         full, public = write_reports(run_dir)
         print(f"full edition (local only): {full.relative_to(ROOT)}\npublic edition: {public.relative_to(ROOT)}")
 

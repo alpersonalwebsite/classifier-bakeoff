@@ -36,6 +36,7 @@ The result is a second label set kept beside the frozen dataset, which does not 
 
 **B3. A run under the outside definitions.** All six variants run over the frozen messages with the outside definitions as their question text, through the same harness and under the same rules as every run.
 That run records its own question-text version, different from the current one, and is scored against the outside labels.
+It writes no report of its own, since a report scores against the frozen labels; it appears in the current run's report (B4). (Amended 2026-10-08.)
 
 **B4. Does the ranking depend on the definitions?** Two things change between the current setup and the outside one, the definitions the variants answer under and the labels they are scored against, so the report separates them with three rankings:
 the current run scored against the current labels (today's report); the current run scored against the outside labels, which needs no new calls and shows the effect of the labels alone; and the outside run scored against the outside labels, which, compared with the middle one, shows the effect of the definitions alone.
@@ -67,7 +68,7 @@ It applies no threshold; it shows what changed.
 - The outside model is `google/gemini-3.1-pro-preview` on `google-vertex/global`, as in spec 004, under the same Google terms the owner accepted.
 - The outside labeler may give two intents, so the "either intent" credit exists in both conditions. Without that, variants would lose it unequally: on the 11 two-intent messages Gemini labeled in spec 004, scoring against its single pick cost the variants between 1 and 4 messages each, which would look like a definitions effect.
 - Expected cost, estimated, not measured: drafting definitions about $0.05; labeling 200 messages about $0.80 at spec 004's measured $0.30 for 72; one full run about $0.90 at the 2026-10-07 run's measured $0.88. Each step keeps its own spend cap.
-- The current run, definitions, labels, ranking, and conclusions stay as published; the outside comparison is added beside them.
+- The current run, definitions, labels, ranking, and conclusions stay as published; the outside comparison is added beside them. (Spec 006 later replaced the published run and its conclusions with a run that defines intent.)
 
 ## Risks and open questions
 

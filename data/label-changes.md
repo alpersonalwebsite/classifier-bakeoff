@@ -2,6 +2,8 @@
 
 Made on 2026-10-07 after review, when the question text gained explicit definitions for timeline, wants_contact, and urgency (spec 001 B1).
 The generator wrote each message to match labels chosen first; these rows are where the definitions changed the right answer.
+The one intent row, m138, is not from a definition: the message asks about buying and a general question, so it takes both, as two-intent messages do.
+The urgency reasons were written against the rule as it stood that day, high only for a deadline within about four weeks; the rule now says five weeks (spec 001 B1).
 
 | Message | Question | Old | New | Why |
 |---|---|---|---|---|

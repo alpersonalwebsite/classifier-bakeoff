@@ -22,7 +22,7 @@ The report also says nothing about how much its results depend on the labels rev
 
 **Out**:
 - A second dataset written by a non-Claude model. It is the only real test of generator bias and is its own spec.
-- An independent relabeling of the 46 edited messages, by the owner or by a non-Claude model. It is the only real test of whether the review was biased, and is its own change.
+- An independent relabeling of the 46 edited labels (on 42 messages), by the owner or by a non-Claude model. It is the only real test of whether the review was biased, and is its own change.
 - Changing what the variants are sent. Prompt shape is fixed by the APIs and spec 001.
 - Weighting the four questions differently. Every question counts the same.
 
@@ -80,8 +80,8 @@ Beside the table, the report states who proposed the edits and who approved them
 - All four right is the primary measure because it is the whole triage job; intent alone is shown but never decides a rank.
 - Ties are decided by the data (overlapping paired intervals), not by a fixed threshold, so the rule needs no tuned number.
 - Cost before latency within a tier, because the latency gaps here (sub-second to a few seconds) matter less for lead triage than a 30x cost gap. Latency still breaks exact cost ties.
-- The rule was chosen after seeing the 2026-10-07 run, so it is checked against alternatives rather than trusted. On that run, rank 1 is decisions-batched under B1, under intent alone with cost as the tie-break, under intent alone with latency, and under B1 with the pre-review labels (computed during drafting). The rule is fixed from here on and is not retuned to future runs.
-- Applying B1 to the 2026-10-07 run gives: 1 decisions (batched and per question, identical answers on 800 of 800 questions), 2 sonnet-batched (tier 1, all 84.5%); 3 jev, 4 haiku-per-q (tier 2); 5 haiku-batched (tier 3). Computed during drafting, to be confirmed by the implementation.
+- The rule was chosen after seeing the first full 2026-10-07 run, made before intent had a definition and whose report was later removed (spec 006 B3), so it is checked against alternatives rather than trusted. On that run, rank 1 is decisions-batched under B1, under intent alone with cost as the tie-break, under intent alone with latency, and under B1 with the pre-review labels (computed during drafting). The rule is fixed from here on and is not retuned to future runs.
+- Applying B1 to that first run gives: 1 decisions (batched and per question, identical answers on 800 of 800 questions), 2 sonnet-batched (tier 1, all 84.5%); 3 jev, 4 haiku-per-q (tier 2); 5 haiku-batched (tier 3). Computed during drafting, to be confirmed by the implementation.
 - Rescoring that run against the pre-review labels moved the two Anthropic variants 16.5 points apart (Sonnet +15.5, haiku-batched -1.0), so the edits do not move one vendor uniformly; this is a statement about dependence on the edits, not evidence for or against reviewer bias, for the reason B6 gives.
 
 ## Risks and open questions

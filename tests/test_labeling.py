@@ -123,3 +123,15 @@ def test_b8_labelings_with_different_declarations_are_grouped_apart():
     page = render(meta, [], public=True, withheld=[], human=human)
     a, b = page.index("Had read: nothing about this project"), page.index("Had read: the published report")
     assert a < page.index("<b>fresh</b>") < b < page.index("<b>reader</b>")
+
+
+def test_b9_summary_works_from_committed_data_and_says_what_it_leaves_out(frozen):
+    items = labeling.blind_set(frozen, "edits")
+    truth = {m["id"]: m["truth"] for m in frozen}
+    saved = {"set": "edits", "exposure": "none",
+             "answers": {i["blind_id"]: {q.name: truth[i["message_id"]][q.name][:1] for q in QUESTIONS} for i in items}}
+    rec = labeling.import_first(frozen, saved, "clone-reader")
+    rec["second_look"] = None
+    text = labeling.summary(rec, frozen, relabel.edited_labels(), relabel.load())
+    assert "edits set, 72 messages" in text and "intent         72 of 72 (100.0%)" in text
+    assert "rater " in text and "needs the run's raw call records" in text
