@@ -39,7 +39,7 @@ Its raw responses stay local with the other call records.
 If it fails to answer a message after retries, that message is left out of every measure below and the count of such messages is shown.
 
 **B3. Did the edits hold up?** For each edited label, the rater counts as agreeing with the frozen label when its answer is one of the frozen labels, and with the generated label when its answer is one of those.
-An answer in both sets agrees with both and counts toward both shares, so the two can add up to more than the edited labels; it counts as neither only when it is in neither set. (Amended 2026-10-16: the first version counted such an answer toward the frozen label only.)
+An answer in both sets agrees with both and counts toward both shares, so the two can add up to more than the edited labels and the report says so under the table; it counts as neither only when it is in neither set. (Amended 2026-10-16: the first version counted such an answer toward the frozen label only.)
 The report shows these shares per question (urgency, wants_contact, timeline, intent), each as a count and a share: agreeing with the frozen labels, agreeing with the generated labels, and agreeing with neither.
 Beside each question it shows the rater's agreement with the frozen labels on that same question across the controls, so each question's edits are compared with that question's baseline. The 46 edits are mostly urgency (28) and wants_contact (14), and a pooled baseline would be pulled up by easier questions.
 
@@ -61,6 +61,7 @@ Until a relabeling exists, the report says none has been made.
 - **B2.** Given the rater's vendor, when it is compared with the vendors of the variants in the run, then it is none of them.
 - **B2.** Given a message the rater never answered, when the measures are computed, then that message is excluded and counted.
 - **B3.** Given an edited label where the rater picks the frozen label, one where it picks the generated label, and one where it picks neither, when agreement is computed, then each counts toward its own share.
+- **B3.** Given an edited label whose frozen and generated sets share a label, when the rater picks that shared label, then it counts toward both the frozen and the generated share and not toward neither, and the report says the two shares can then add up to more than 100%.
 - **B3.** Given a two-intent message where the rater picks either intent, when agreement is computed, then it agrees with that label set.
 - **B3.** Given rater answers on the controls, when the baseline is computed, then it is computed per question and each edited question is shown beside its own baseline.
 - **B4.** Given rater labels that differ from the frozen labels on edited and on control labels, when the ranking is recomputed, then only the edited labels change, control labels and two-intent sets stay as frozen, and the report shows both rankings with a plain statement of whether rank 1 and the tiers match.

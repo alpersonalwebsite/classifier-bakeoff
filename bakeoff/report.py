@@ -9,6 +9,12 @@ from .scoring import VariantScore
 
 ROOT = Path(__file__).resolve().parent.parent
 WITHHELD_FILE = ROOT / "withheld.json"
+
+# Spec 004 B3: an edited-label answer in both sets counts toward both shares.
+BOTH_SETS_NOTE = (
+    "An answer that is in both the frozen and the generated set counts toward both, "
+    "so the frozen and generated shares can add up to more than 100%."
+)
 DEFINITIONS_NOTE = (
     "All four definitions the variants were given, including intent's (taken from the rule the dataset was "
     "generated under), come from the Claude-assisted drafting."
@@ -309,6 +315,7 @@ def render(
                      "agreement with the frozen labels on that question across the controls.</p>")
         parts.append('<div class="scroll">' + _table(
             ["Question", "Edited labels", "Agrees with frozen", "Agrees with generated", "Neither", "Control agreement"], rows) + "</div>")
+        parts.append(f"<p class='muted'>{BOTH_SETS_NOTE}</p>")
         alt = {s.name: s for s in relabel["ranked"]}
         rows, same = [], True
         for s in complete:
@@ -448,6 +455,8 @@ def render(
                 if h.get("second"):
                     headers.append("Second look: kept mine / gave up / unsure")
                 parts.append('<div class="scroll">' + _table(headers, rows) + "</div>")
+                if h.get("edits"):
+                    parts.append(f"<p class='muted'>{BOTH_SETS_NOTE}</p>")
                 if not h.get("second"):
                     parts.append("<p class='muted'>No second look at the disagreements is on record for this labeling.</p>")
                 alt = {s.name: s for s in h["ranked"]}
