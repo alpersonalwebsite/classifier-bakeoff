@@ -45,7 +45,7 @@ Before the first message, the page asks what the labeler had already read, as on
 A labeler who wants theirs in the published report commits it through a pull request.
 
 **B5. The comparison.** For each labeling on record and each question, the report shows how often the labeler's first-pass answer matches the frozen label.
-On the edits set it also shows, over the edited labels, how often the labeler chose the frozen label, the label as generated, or neither, beside the labeler's agreement on that question across the controls and beside the outside rater's figures, as spec 004 does.
+On the edits set it also shows, over the edited labels, how often the labeler chose the frozen label, the label as generated, or neither (an answer in both counts toward both, as in spec 004 B3), beside the labeler's agreement on that question across the controls and beside the outside rater's figures, as spec 004 does.
 
 **B6. The second look.** After the first pass, the labeler reviews every answer that differs from the frozen label, now with that question's current definition and the frozen label shown, and marks it keep mine, keep frozen, or unsure.
 The report shows those counts per question: disagreements kept after reading the definition are where it draws a line the labeler would not; ones given up are where the plain question was ambiguous.

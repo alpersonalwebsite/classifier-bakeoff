@@ -175,12 +175,11 @@ def agreement(record: dict, dataset: list[dict], edits: dict) -> dict:
                 continue
             ans = record["labels"][mid][q.name]
             row["edited"] += 1
-            if ans in new:
-                row["frozen"] += 1
-            elif ans in old:
-                row["generated"] += 1
-            else:
-                row["neither"] += 1
+            # An answer in both sets (m138's intent: generated [general question], frozen
+            # [buy, general question]) agrees with both, so it counts toward both (spec 004 B3).
+            row["frozen"] += ans in new
+            row["generated"] += ans in old
+            row["neither"] += ans not in new and ans not in old
         for mid, ans in record["labels"].items():
             if mid in edited_ids:
                 continue

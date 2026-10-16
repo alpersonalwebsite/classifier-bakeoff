@@ -135,3 +135,26 @@ def test_b9_summary_works_from_committed_data_and_says_what_it_leaves_out(frozen
     text = labeling.summary(rec, frozen, relabel.edited_labels(), relabel.load())
     assert "edits set, 72 messages" in text and "intent         72 of 72 (100.0%)" in text
     assert "rater " in text and "needs the run's raw call records" in text
+
+
+def test_b5_an_answer_matching_both_sets_counts_toward_both(frozen):
+    edits = relabel.edited_labels()
+    (mid, q), (old, new) = next((k, v) for k, v in edits.items() if set(v[0]) & set(v[1]))
+    row = {qq.name: next(m for m in frozen if m["id"] == mid)["truth"][qq.name] for qq in QUESTIONS}
+    shared = sorted(set(old) & set(new))[:1]
+    a = labeling.edits_agreement({"set": "edits", "labels": {mid: {**row, q: shared}}}, frozen, edits)
+    assert (a[q]["frozen"], a[q]["generated"], a[q]["neither"]) == (1, 1, 0)
+
+
+def test_b5_edits_table_says_an_answer_can_count_toward_both():
+    from bakeoff.report import BOTH_SETS_NOTE, render
+
+    meta = {"run_id": "r", "started_at": "2026-10-16T00:00:00Z", "dataset_version": "d", "cap_usd": 2.0, "prices": {}, "models": {}}
+    agree = {q.name: 1 for q in QUESTIONS}
+    row = {"edited": 1, "frozen": 1, "generated": 1, "neither": 0, "control": 1, "control_agree": 1}
+    base = {"agree": agree, "n": 2, "ranked": [], "second": None}
+    edits = {**base, "record": {"labeler": "e", "set": "edits", "exposure": "none", "imported_at": "2026-10-16"},
+             "edits": {q.name: row for q in QUESTIONS}, "rater": None}
+    unseen = {**base, "record": {"labeler": "u", "set": "unseen", "exposure": "none", "imported_at": "2026-10-16"}}
+    assert BOTH_SETS_NOTE in render(meta, [], public=True, withheld=[], human=[edits])
+    assert BOTH_SETS_NOTE not in render(meta, [], public=True, withheld=[], human=[unseen])
