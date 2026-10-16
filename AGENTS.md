@@ -31,7 +31,7 @@ The repository is public.
 
 ```sh
 uv sync
-uv run pytest                                   # 107 offline tests, no keys needed
+uv run pytest                                   # 109 offline tests, no keys needed
 uv run python -m bakeoff run --variant haiku-batched --limit 5   # smoke test, costs cents
 uv run python -m bakeoff run                    # full run, under $1; ask before running
 uv run python -m bakeoff report [results/<run_id>]   # rebuild reports from the newest run under the current definitions (or the one named), no API calls

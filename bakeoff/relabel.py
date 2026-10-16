@@ -17,7 +17,7 @@ from pathlib import Path
 from .costing import call_cost, usage_from_response
 from .dataset import LABEL_CHANGES_FILE, ROOT
 from .providers import Answer, _OpenRouter, claude_request, judge
-from .questions import QUESTIONS
+from .questions import QUESTIONS, questions_version
 
 RATER_MODEL = "google/gemini-3.1-pro-preview"
 RATER_ENDPOINT = "google-vertex/global"
@@ -155,7 +155,21 @@ def run(items: list[dict], client: _OpenRouter | None = None, results_dir: Path 
         "cost_usd": round(spent, 6),
         "labels": labels,
         "failed": failed,
+        # The question text the rater was given, so a report under later text can say what differs.
+        "questions_version": questions_version(),
+        "question_text": {q.name: q.text for q in QUESTIONS},
     }
+
+
+def replace_record(previous: dict | None, new: dict, discard_reason: str | None) -> dict:
+    """Spec 004 B2: a new pass replaces the record on file only with a stated reason, and the
+    replaced pass joins discarded_passes, carried forward with any recorded before it."""
+    if previous is None:
+        return new
+    if not discard_reason:
+        raise ValueError("a relabeling is already on record; pass --discard-previous REASON to replace it and record why")
+    entry = {"date": previous.get("date"), "cost_usd": previous.get("cost_usd"), "reason": discard_reason}
+    return {**new, "discarded_passes": [*(previous.get("discarded_passes") or []), entry]}
 
 
 def load(path: Path | None = None) -> dict | None:

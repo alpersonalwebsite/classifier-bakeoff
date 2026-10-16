@@ -146,7 +146,8 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--cap", type=float, default=DEFAULT_CAP_USD, help="spend cap per variant in USD")
     r.add_argument("--limit", type=int, help="first N messages only, for a smoke test (reported as partial)")
     r.add_argument("--question-set", default="current", help="definition set under data/definitions/ (spec 005); default: current")
-    sub.add_parser("relabel", help="blind outside-model relabeling of the edited messages (spec 004); costs money")
+    rl = sub.add_parser("relabel", help="blind outside-model relabeling of the edited messages (spec 004); costs money")
+    rl.add_argument("--discard-previous", metavar="REASON", help="replace the relabeling on record, keeping it as a discarded pass with this reason")
     lp = sub.add_parser("label-page", help="write the local blind labeling page (spec 007); no key, no cost")
     lp.add_argument("--set", choices=labeling.SETS, default="edits", help="edits: if you have not followed the review; unseen: if you have")
     li = sub.add_parser("label-import", help="import a saved labels file under your chosen name")
@@ -196,8 +197,12 @@ def main(argv: list[str] | None = None) -> None:
     if args.command == "relabel":
         load_env()
         dataset, _ = ds.load_frozen()
+        previous = relabel.load()
+        if previous is not None and not args.discard_previous:
+            # Refuse before any paid call, so a rerun never silently drops the pass on record.
+            sys.exit("a relabeling is already on record; pass --discard-previous REASON to replace it and record why")
         items = relabel.blind_set(dataset, relabel.edited_labels())
-        record = relabel.run(items)
+        record = relabel.replace_record(previous, relabel.run(items), args.discard_previous)
         relabel.RELABEL_DIR.mkdir(parents=True, exist_ok=True)
         relabel.RELABEL_FILE.write_text(json.dumps(record, indent=2) + "\n")
         print(f"labeled {len(record['labels'])} of {len(items)}, failed {len(record['failed'])}, cost ${record['cost_usd']:.4f}")

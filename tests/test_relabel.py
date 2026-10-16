@@ -232,3 +232,26 @@ def test_b2_report_names_a_discarded_pass_from_the_record():
     assert "none of the discarded pass" in page
     record["discarded_passes"] = []
     assert "was discarded" not in render(meta, [], public=True, withheld=[], relabel=info)
+
+
+def test_b2_a_rerun_keeps_discarded_passes_and_needs_a_reason():
+    earlier = {"date": "20261007T220912Z", "cost_usd": 0.2, "reason": "cut off"}
+    previous = {"date": "20261007T221617Z", "cost_usd": 0.3, "labels": {}, "discarded_passes": [earlier]}
+    new = {"date": "20261016T000000Z", "cost_usd": 0.3, "labels": {}}
+    assert relabel.replace_record(None, new, None) is new
+    with pytest.raises(ValueError):
+        relabel.replace_record(previous, new, None)
+    out = relabel.replace_record(previous, new, "test rerun")
+    assert out["discarded_passes"] == [earlier, {"date": "20261007T221617Z", "cost_usd": 0.3, "reason": "test rerun"}]
+    assert out["date"] == "20261016T000000Z"
+
+
+def test_b2_the_record_carries_the_question_text_it_was_given(tmp_path):
+    from bakeoff.providers import _OpenRouter
+    from bakeoff.questions import questions_version
+
+    good = {"intent": "buy", "timeline": "unknown", "wants_contact": "yes", "urgency": "normal"}
+    record = relabel.run([{"blind_id": "b01", "message_id": "m001", "text": "a"}], client=_OpenRouter(inner=mock(lambda r: json_response(_answer(good)))),
+                         results_dir=tmp_path, sleep=lambda s: None)
+    assert record["questions_version"] == questions_version()
+    assert record["question_text"] == {q.name: q.text for q in QUESTIONS}
