@@ -205,3 +205,15 @@ def test_b3_an_answer_in_both_sets_counts_toward_both():
     assert (both["frozen"], both["generated"], both["neither"]) == (1, 1, 0)
     only = relabel.agreement({"labels": {"m001": {**base, "intent": "buy"}}}, rows, edits)["intent"]
     assert (only["frozen"], only["generated"], only["neither"]) == (1, 0, 0)
+
+
+def test_b3_report_notes_that_an_answer_can_count_toward_both():
+    from bakeoff.report import BOTH_SETS_NOTE, render
+
+    meta = {"run_id": "r", "started_at": "2026-10-16T00:00:00Z", "dataset_version": "d", "cap_usd": 2.0, "prices": {}, "models": {}}
+    row = {"edited": 1, "frozen": 1, "generated": 1, "neither": 0, "control": 1, "control_agree": 1}
+    record = {"rater_model": "google/x", "rater_vendor": "google", "blind_set": {"messages": 2, "controls": 1}, "failed": []}
+    info = {"record": record, "agreement": {q.name: row for q in QUESTIONS}, "edited_count": 1, "ranked": []}
+    page = render(meta, [], public=True, withheld=[], relabel=info)
+    start = page.index("Agrees with generated")
+    assert BOTH_SETS_NOTE in page[start:start + 2000]
