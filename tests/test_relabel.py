@@ -255,3 +255,29 @@ def test_b2_the_record_carries_the_question_text_it_was_given(tmp_path):
                          results_dir=tmp_path, sleep=lambda s: None)
     assert record["questions_version"] == questions_version()
     assert record["question_text"] == {q.name: q.text for q in QUESTIONS}
+
+
+def test_b2_a_rerun_without_a_reason_stops_before_any_paid_call(monkeypatch):
+    import bakeoff.__main__ as cli
+
+    monkeypatch.setattr(relabel, "load", lambda path=None: {"date": "20261007T221617Z", "labels": {}})
+    monkeypatch.setattr(cli, "load_env", lambda *a, **k: None)
+
+    def paid(*a, **k):
+        raise AssertionError("relabel.run was called")
+
+    monkeypatch.setattr(relabel, "run", paid)
+    with pytest.raises(SystemExit) as stop:
+        cli.main(["relabel"])
+    assert "--discard-previous" in str(stop.value)
+
+
+def test_b2_report_handles_a_discarded_pass_with_no_date():
+    from bakeoff.report import render
+
+    meta = {"run_id": "r", "started_at": "2026-10-16T00:00:00Z", "dataset_version": "d", "cap_usd": 2.0, "prices": {}, "models": {}}
+    row = {"edited": 1, "frozen": 1, "generated": 0, "neither": 0, "control": 1, "control_agree": 1}
+    record = {"rater_model": "google/x", "rater_vendor": "google", "blind_set": {"messages": 2, "controls": 1}, "failed": [],
+              "discarded_passes": [{"date": None, "cost_usd": None, "reason": "hand-written"}]}
+    info = {"record": record, "agreement": {q.name: row for q in QUESTIONS}, "edited_count": 1, "ranked": []}
+    assert "An earlier pass on an unrecorded date was discarded" in render(meta, [], public=True, withheld=[], relabel=info)
