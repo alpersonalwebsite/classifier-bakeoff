@@ -193,3 +193,15 @@ def test_spec005_b2_the_frozen_dataset_is_unchanged_by_outside_labels(frozen):
     out = relabel.outside_dataset(frozen, record)
     assert json.dumps(frozen, sort_keys=True) == before and len(out) == 1 and out[0]["truth"]["intent"] == ["sell"]
     assert ds.load_frozen()[1] == "sha256:8c43a059d800a559"
+
+
+def test_b3_an_answer_in_both_sets_counts_toward_both():
+    # m138's shape: generated [general question], frozen [buy, general question].
+    rows = _rows(1)
+    rows[0]["truth"]["intent"] = ["buy", "general question"]
+    edits = {("m001", "intent"): (["general question"], ["buy", "general question"])}
+    base = {"timeline": "unknown", "wants_contact": "yes", "urgency": "normal"}
+    both = relabel.agreement({"labels": {"m001": {**base, "intent": "general question"}}}, rows, edits)["intent"]
+    assert (both["frozen"], both["generated"], both["neither"]) == (1, 1, 0)
+    only = relabel.agreement({"labels": {"m001": {**base, "intent": "buy"}}}, rows, edits)["intent"]
+    assert (only["frozen"], only["generated"], only["neither"]) == (1, 0, 0)

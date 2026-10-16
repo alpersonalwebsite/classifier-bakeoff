@@ -1,6 +1,7 @@
 # 004: An independent relabeling of the reviewed messages
 
 **Status**: Implemented
+**Amended**: 2026-10-16, B3: an answer in both the frozen and the generated set counts toward both
 **Created**: 2026-10-07
 
 ## Problem
@@ -38,6 +39,7 @@ Its raw responses stay local with the other call records.
 If it fails to answer a message after retries, that message is left out of every measure below and the count of such messages is shown.
 
 **B3. Did the edits hold up?** For each edited label, the rater counts as agreeing with the frozen label when its answer is one of the frozen labels, and with the generated label when its answer is one of those.
+An answer in both sets agrees with both and counts toward both shares, so the two can add up to more than the edited labels; it counts as neither only when it is in neither set. (Amended 2026-10-16: the first version counted such an answer toward the frozen label only.)
 The report shows these shares per question (urgency, wants_contact, timeline, intent), each as a count and a share: agreeing with the frozen labels, agreeing with the generated labels, and agreeing with neither.
 Beside each question it shows the rater's agreement with the frozen labels on that same question across the controls, so each question's edits are compared with that question's baseline. The 46 edits are mostly urgency (28) and wants_contact (14), and a pooled baseline would be pulled up by easier questions.
 

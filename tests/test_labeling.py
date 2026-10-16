@@ -135,3 +135,12 @@ def test_b9_summary_works_from_committed_data_and_says_what_it_leaves_out(frozen
     text = labeling.summary(rec, frozen, relabel.edited_labels(), relabel.load())
     assert "edits set, 72 messages" in text and "intent         72 of 72 (100.0%)" in text
     assert "rater " in text and "needs the run's raw call records" in text
+
+
+def test_b5_an_answer_matching_both_sets_counts_toward_both(frozen):
+    edits = relabel.edited_labels()
+    (mid, q), (old, new) = next((k, v) for k, v in edits.items() if set(v[0]) & set(v[1]))
+    row = {qq.name: next(m for m in frozen if m["id"] == mid)["truth"][qq.name] for qq in QUESTIONS}
+    shared = sorted(set(old) & set(new))[:1]
+    a = labeling.edits_agreement({"set": "edits", "labels": {mid: {**row, q: shared}}}, frozen, edits)
+    assert (a[q]["frozen"], a[q]["generated"], a[q]["neither"]) == (1, 1, 0)

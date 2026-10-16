@@ -291,12 +291,11 @@ def edits_agreement(record: dict, dataset: list[dict], edits: dict) -> dict:
                 continue
             ans = record["labels"][mid][q.name]
             row["edited"] += 1
-            if matches(ans, new):
-                row["frozen"] += 1
-            elif matches(ans, old):
-                row["generated"] += 1
-            else:
-                row["neither"] += 1
+            # An answer sharing a label with both sets counts toward both, as in spec 004 B3.
+            in_new, in_old = matches(ans, new), matches(ans, old)
+            row["frozen"] += in_new
+            row["generated"] += in_old
+            row["neither"] += not in_new and not in_old
         for mid, ans in record["labels"].items():
             if mid not in edited_ids:
                 row["control"] += 1
