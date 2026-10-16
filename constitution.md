@@ -57,5 +57,5 @@ It does not do neither.
 
 ## Changelog
 
-- 2026-10-07: 1.1.0. Added Principle 6, because the repository will be public. Principle 4 reworded to stop naming a company, since this is a personal project.
+- 2026-10-07: 1.1.0. Added Principle 6, because the repository will be public. Principle 4 reworded to stop naming a company, since this is a personal project. Principle 2's last rule reworded in the same amendment, so a question that completes on retry still counts as classified (entry corrected 2026-10-16; it had omitted this).
 - 2026-10-07: 2.0.0 (major: Principle 2 redefined). Principle 2 now names the billing service, not the model vendor, as the source of token counts, and prefers its reported cost, so all three providers can run through one gateway (OpenRouter) with a single key. Its heading changed from "Vendor-native measurement" to match.
