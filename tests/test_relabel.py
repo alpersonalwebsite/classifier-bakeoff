@@ -217,3 +217,18 @@ def test_b3_report_notes_that_an_answer_can_count_toward_both():
     page = render(meta, [], public=True, withheld=[], relabel=info)
     start = page.index("Agrees with generated")
     assert BOTH_SETS_NOTE in page[start:start + 2000]
+
+
+def test_b2_report_names_a_discarded_pass_from_the_record():
+    from bakeoff.report import render
+
+    meta = {"run_id": "r", "started_at": "2026-10-16T00:00:00Z", "dataset_version": "d", "cap_usd": 2.0, "prices": {}, "models": {}}
+    row = {"edited": 1, "frozen": 1, "generated": 0, "neither": 0, "control": 1, "control_agree": 1}
+    record = {"rater_model": "google/x", "rater_vendor": "google", "blind_set": {"messages": 2, "controls": 1}, "failed": [],
+              "discarded_passes": [{"date": "20261007T220912Z", "cost_usd": 0.1, "reason": "answers cut off at the output limit"}]}
+    info = {"record": record, "agreement": {q.name: row for q in QUESTIONS}, "edited_count": 1, "ranked": []}
+    page = render(meta, [], public=True, withheld=[], relabel=info)
+    assert "An earlier pass on 2026-10-07 was discarded" in page and "answers cut off at the output limit" in page
+    assert "none of the discarded pass" in page
+    record["discarded_passes"] = []
+    assert "was discarded" not in render(meta, [], public=True, withheld=[], relabel=info)

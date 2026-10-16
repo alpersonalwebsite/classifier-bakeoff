@@ -1,7 +1,7 @@
 # 004: An independent relabeling of the reviewed messages
 
 **Status**: Implemented
-**Amended**: 2026-10-16, B3: an answer in both the frozen and the generated set counts toward both
+**Amended**: 2026-10-16, B3: an answer in both the frozen and the generated set counts toward both; B2: a discarded pass is recorded and reported
 **Created**: 2026-10-07
 
 ## Problem
@@ -36,6 +36,7 @@ It never sees a label: not the frozen one, not the generated one, and not any va
 For this spec it is `google/gemini-3.1-pro-preview` through OpenRouter, pinned to Google's standard global Vertex endpoint (`google-vertex/global`, not its flex or priority tiers) with no fallback, so one known set of Google terms and one price apply, and the endpoint that actually served each call is recorded.
 It answers every question with exactly one allowed label in a single pass, with reasoning effort set low and a spend cap of $3 for the pass, and its labels, the model and endpoint it reported, those settings, and the date are committed beside the dataset.
 Its raw responses stay local with the other call records.
+If a pass has to be thrown away and run again in full, the discarded pass is recorded beside the labels with its date and reason, none of its answers are used, and the report says so; "single pass" means the one pass that is counted. (Amended 2026-10-16: the first 2026-10-07 pass was discarded after the output limit cut off 36 of 72 answers, and that was recorded only in the data file.)
 If it fails to answer a message after retries, that message is left out of every measure below and the count of such messages is shown.
 
 **B3. Did the edits hold up?** For each edited label, the rater counts as agreeing with the frozen label when its answer is one of the frozen labels, and with the generated label when its answer is one of those.
@@ -60,6 +61,7 @@ Until a relabeling exists, the report says none has been made.
 - **B1.** Given the request sent for any message, when it is compared with a variant's request for that message, then the question text and label wording match word for word.
 - **B2.** Given the rater's vendor, when it is compared with the vendors of the variants in the run, then it is none of them.
 - **B2.** Given a message the rater never answered, when the measures are computed, then that message is excluded and counted.
+- **B2.** Given a relabeling record with a discarded pass, when the report renders, then it gives the pass's date and recorded reason and says none of its answers are used.
 - **B3.** Given an edited label where the rater picks the frozen label, one where it picks the generated label, and one where it picks neither, when agreement is computed, then each counts toward its own share.
 - **B3.** Given an edited label whose frozen and generated sets share a label, when the rater picks that shared label, then it counts toward both the frozen and the generated share and not toward neither, and the report says the two shares can then add up to more than 100%.
 - **B3.** Given a two-intent message where the rater picks either intent, when agreement is computed, then it agrees with that label set.
