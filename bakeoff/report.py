@@ -288,6 +288,14 @@ def render(
         )
         if rec.get("failed"):
             parts.append(f'<p class="warn">{len(rec["failed"])} messages got no answer and are left out of everything below.</p>')
+        for d in rec.get("discarded_passes") or []:
+            # Spec 004 B2: a pass thrown away before the counted one is reported, from the record.
+            stamp = d.get("date") or ""
+            day = f"{stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}" if len(stamp) >= 8 else "an unrecorded date"
+            parts.append(
+                f"<p class='muted'>An earlier pass on {_e(day)} was discarded and the pass above was run in full again; "
+                f"none of the discarded pass's answers are used. Recorded reason: {_e(d.get('reason', 'not recorded'))}.</p>"
+            )
         if rec.get("questions_version") and rec["questions_version"] != meta.get("questions_version"):
             # Say exactly which questions differ and how many checked labels that touches,
             # rather than implying the whole check is stale.
